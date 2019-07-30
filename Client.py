@@ -1,7 +1,7 @@
-import argparse
 import time
 import csv
 import socket
+import axes
 
 
 def connect(ip, port, size, filename):
@@ -47,19 +47,3 @@ def connect(ip, port, size, filename):
                         print("send data error:", ex)
     except ConnectionRefusedError:
         print("wrong port")
-
-'''
-parser = argparse.ArgumentParser()
-parser.add_argument('--ip', help='IP address')
-parser.add_argument('--p', help='Port')
-parser.add_argument('--f', help='Filename')
-parser.add_argument('--s', help='Size')
-
-args = parser.parse_args()
-
-
-if args.ip and args.p and args.s and args.f:
-    connect(args.ip, args.p, args.s, args.f)
-else:
-    print('Not enough arguments!!!')
-'''
