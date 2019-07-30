@@ -3,6 +3,7 @@ import random
 from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import axes
 
 
 class MyMplCanvas(FigureCanvas):
@@ -33,7 +34,7 @@ class MyDynamicMplCanvas(MyMplCanvas):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self.update_figure)
-        timer.start(1000)
+        timer.start(100)
 
     def compute_initial_figure(self):
         self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
@@ -41,6 +42,9 @@ class MyDynamicMplCanvas(MyMplCanvas):
     def update_figure(self):
         # Build a list of 4 random integers between 0 and 10 (both inclusive)
         l = [random.randint(0, 10) for i in range(4)]
-        self.axes.cla()
-        self.axes.plot([0, 1, 2, 3], l, 'r')
+        #l = [axes.graph_y for i in range(4)]
+        #self.axes.cla()
+        #self.axes.plot([0, 1, 2, 3], l, 'r')
+        length = len(axes.graph_y)
+        self.axes.plot([length - 1, length], [axes.graph_y[length - 2], axes.graph_y[length - 1]])
         self.draw()
