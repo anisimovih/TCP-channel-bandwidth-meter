@@ -13,12 +13,13 @@ import axes
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import (QThread, pyqtSignal)
-from PyQt5 import Qt
+from PyQt5.Qt import (QMessageBox)
 
-from Client import connect
+from Client import connect_to_server
 from Qt_designer import UiMainWindow
 from catching_fall_errors import log_uncaught_exceptions
 
+ip = 0
 sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слотах, если приложение просто падает без стека
 
 
@@ -31,20 +32,18 @@ class AThread(QThread):
         super().__init__()
 
     def run(self):
-        count = 0
-        while count < 1000:
-            # time.sleep(1)
-            Qt.QThread.msleep(2000)
-            count += 1
-            self.threadSignalAThread.emit(count)
-            axes.graph_y.append(count)
+        self.threadSignalAThread.emit(1)
+        connect_to_server(axes.ip,
+                          axes.port,
+                          axes.size,
+                          axes.filename)
 
 
 class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
         self.setup_ui(self)
-        self.start_button.clicked.connect(self.using_q_thread)
+        self.start_button.clicked.connect(self.using_a_thread)
 
         self.thread = None
         self.objThread = None
@@ -57,21 +56,24 @@ class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
 
     @QtCore.pyqtSlot()
     def on_start_button_click(self):
-        ip = self.entered_IP.text()
-        port = self.entered_port.text()
-        filename = self.entered_filename.text()
-        size = self.entered_size.text()
-        connect(ip, port, size, filename)
+        axes.ip = self.entered_IP.text()
+        axes.port = self.entered_port.text()
+        axes.filename = self.entered_filename.text()
+        axes.size = self.entered_size.text()
 
     @QtCore.pyqtSlot()
     def on_stop_button_click(self):
-        self.close()
+        # self.close()
+        axes.ip = self.entered_IP.text()
+        axes.port = self.entered_port.text()
+        axes.filename = self.entered_filename.text()
+        axes.size = self.entered_size.text()
 
     # ---- AThread(QThread) -----------#
-    def using_q_thread(self):
+    def using_a_thread(self):
         if self.thread is None:
             self.thread = AThread()
-            self.thread.finished.connect(self.finishedAThread)
+            self.thread.finished.connect(self.finished_a_thread)  # смысл не установлен
             self.thread.start()
             self.start_button.setText("Stop AThread(QThread)")
         else:
@@ -79,19 +81,19 @@ class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
             self.thread = None
             self.start_button.setText("Start AThread(QThread)")
 
-    def finishedAThread(self):
+    def finished_a_thread(self):
         self.thread = None
         self.start_button.setText("Start AThread(QThread)")
 
     # --END-- AThread(QThread) -------------------#
 
     def closeEvent(self, event):
-        reply = Qt.QMessageBox.question \
+        reply = QMessageBox.question \
             (self, 'Информация',
              "Вы уверены, что хотите закрыть приложение?",
-             Qt.QMessageBox.Yes,
-             Qt.QMessageBox.No)
-        if reply == Qt.QMessageBox.Yes:
+             QMessageBox.Yes,
+             QMessageBox.No)
+        if reply == QMessageBox.Yes:
             if self.thread:
                 self.thread.quit()
             del self.thread
