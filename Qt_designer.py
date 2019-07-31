@@ -1,6 +1,14 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'gui_for_client.ui'
+#
+# Created by: PyQt5 UI code generator 5.13.0
+#
+# WARNING! All changes made in this file will be lost!
 from __future__ import unicode_literals
 from PyQt5 import QtCore, QtWidgets
 from graph import MyDynamicMplCanvas
+import global_variables
 
 
 class UiMainWindow(object):
@@ -46,6 +54,8 @@ class UiMainWindow(object):
         self.console = QtWidgets.QTextEdit(self.centralwidget)
         self.console.setMaximumSize(QtCore.QSize(16777215, 80))
         self.console.setObjectName("console")
+        #self.console.setText(str(global_variables.console))
+        #global_variables.console += 1
         self.gridLayout.addWidget(self.console, 1, 0, 1, 4)
         self.start_button = QtWidgets.QPushButton(self.centralwidget)
         self.start_button.setStyleSheet("background-color: rgb(78, 154, 6);")
