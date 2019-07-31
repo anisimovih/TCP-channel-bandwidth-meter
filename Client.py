@@ -1,7 +1,7 @@
 import time
 import csv
 import socket
-import axes
+import global_variables
 
 
 def connect_to_server(ip, port, size, filename):
@@ -25,7 +25,7 @@ def connect_to_server(ip, port, size, filename):
                         end_time = time.time()
                         delta = format(end_time - start_time, '8f')
                         speed = float(size) / (end_time - start_time)
-                        axes.graph_y.append(speed)
+                        global_variables.graph_y.append(speed)
                         number = b[0] + b[1] * 255 + b[2] * 65025
                         size = len(b)
                         print('start_time = {st}, end_time = {end}, delta = {dell}, '

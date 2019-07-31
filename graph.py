@@ -3,7 +3,7 @@ import random
 from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import axes
+import global_variables
 
 
 class MyMplCanvas(FigureCanvas):
@@ -12,19 +12,10 @@ class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
-
-        self.compute_initial_figure()
-
         FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
         FigureCanvas.setSizePolicy(self,
                                    QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-    def compute_initial_figure(self):
-        pass
 
 
 class MyDynamicMplCanvas(MyMplCanvas):
@@ -33,18 +24,21 @@ class MyDynamicMplCanvas(MyMplCanvas):
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.update_figure)
+        timer.timeout.connect(self.activator)
         timer.start(100)
 
-    def compute_initial_figure(self):
-        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+    def activator(self):
+        if global_variables.graph_active:
+            self.graph_active()
+        else:
+            self.graph_not_active()
 
-    def update_figure(self):
-        # Build a list of 4 random integers between 0 and 10 (both inclusive)
-        l = [random.randint(0, 10) for i in range(4)]
-        #l = [axes.graph_y for i in range(4)]
-        #self.axes.cla()
-        #self.axes.plot([0, 1, 2, 3], l, 'r')
-        length = len(axes.graph_y)
-        self.axes.plot([length - 1, length], [axes.graph_y[length - 2], axes.graph_y[length - 1]])
+    def graph_not_active(self):
+        self.axes.cla()
+        self.axes.plot([0], [0], 'ro')
+        self.draw()
+
+    def graph_active(self):
+        length = len(global_variables.graph_y)
+        self.axes.plot([length - 2, length-1], [global_variables.graph_y[length - 2], global_variables.graph_y[length - 1]], 'r')
         self.draw()

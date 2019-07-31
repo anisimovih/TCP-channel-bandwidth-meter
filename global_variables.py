@@ -1,4 +1,5 @@
-graph_y = [1, 2, 3, 4]
+graph_y = [0]
+graph_active = False
 ip = ''
 port = ''
 filename = ''

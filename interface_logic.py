@@ -9,7 +9,7 @@
 
 # from __future__ import unicode_literals
 import sys
-import axes
+import global_variables
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import (QThread, pyqtSignal)
@@ -33,10 +33,16 @@ class AThread(QThread):
 
     def run(self):
         self.threadSignalAThread.emit(1)
-        connect_to_server(axes.ip,
-                          axes.port,
-                          axes.size,
-                          axes.filename)
+        count = 1
+        global_variables.graph_active = True
+        #connect_to_server(global_variables.ip,
+        #                  global_variables.port,
+         #                 global_variables.size,
+         #                 global_variables.filename)
+        while True:
+            global_variables.graph_y.append(count)
+            count += 1
+            QThread.sleep(1)
 
 
 class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
@@ -56,18 +62,18 @@ class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
 
     @QtCore.pyqtSlot()
     def on_start_button_click(self):
-        axes.ip = self.entered_IP.text()
-        axes.port = self.entered_port.text()
-        axes.filename = self.entered_filename.text()
-        axes.size = self.entered_size.text()
+        global_variables.ip = self.entered_IP.text()
+        global_variables.port = self.entered_port.text()
+        global_variables.filename = self.entered_filename.text()
+        global_variables.size = self.entered_size.text()
 
     @QtCore.pyqtSlot()
     def on_stop_button_click(self):
         # self.close()
-        axes.ip = self.entered_IP.text()
-        axes.port = self.entered_port.text()
-        axes.filename = self.entered_filename.text()
-        axes.size = self.entered_size.text()
+        global_variables.ip = self.entered_IP.text()
+        global_variables.port = self.entered_port.text()
+        global_variables.filename = self.entered_filename.text()
+        global_variables.size = self.entered_size.text()
 
     # ---- AThread(QThread) -----------#
     def using_a_thread(self):
