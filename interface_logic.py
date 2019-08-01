@@ -1,32 +1,42 @@
-import sys
-import global_variables
+import sys  # sys нужен для передачи argv в QApplication
+from PyQt5 import QtWidgets
 import csv
 import os.path
+import client_gui  # Это наш конвертированный файл дизайна
+import global_variables
+import PyQt5
 
+from graph import MyDynamicMplCanvas
+from catching_fall_errors import log_uncaught_exceptions
+from threads import AThread
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import (QMessageBox)
 
-from client import connect_to_server
-from Qt_designer import UiMainWindow
-from catching_fall_errors import log_uncaught_exceptions
-from threads import AThread
-
-ip = 0
 sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слотах, если приложение просто падает без стека
 
 
-class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
-    def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
-        self.setup_ui(self)
-        self.start_button.clicked.connect(self.using_a_thread)
+class ExampleApp(QtWidgets.QMainWindow, client_gui.Ui_client_window):
+    def __init__(self):
+        # Это здесь нужно для доступа к переменным, методам
+        # и т.д. в файле design.py
+        super().__init__()
+        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+        ''''добавляем график'''
+        dc = MyDynamicMplCanvas(self.centralwidget, width=5, height=4, dpi=100)
+        self.gridLayout.addWidget(dc, 0, 0, 1, 4)
+
+        self.start_button.clicked.connect(self.on_start_button_click)
+
+        self.thread_2 = None
+        self.thread = None
+        self.objThread = None
 
         self.thread_2 = None
         self.thread = None
         self.objThread = None
 
         self.stop_button.clicked.connect(self.on_stop_button_click)
-        self.entered_IP.setText("127.0.0.1")
+        self.entered_ip.setText("127.0.0.1")
         self.entered_port.setText("10002")
         self.entered_size.setText("1000")
         self.entered_filename.setText("client.csv")
@@ -37,18 +47,20 @@ class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
 
     @QtCore.pyqtSlot()
     def on_start_button_click(self):
-        global_variables.ip = self.entered_IP.text()
+        global_variables.ip = self.entered_ip.text()
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
         global_variables.size = self.entered_size.text()
+        self.using_a_thread()
 
     @QtCore.pyqtSlot()
     def on_stop_button_click(self):
         # self.close()
-        global_variables.ip = self.entered_IP.text()
+        global_variables.ip = self.entered_ip.text()
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
         global_variables.size = self.entered_size.text()
+
 
     '''ИСПРАВИТЬ: выводит результаты только после окончания передачи'''
     def printing_to_console(self):
@@ -93,12 +105,17 @@ class MainWindow(QtWidgets.QMainWindow, UiMainWindow):
                 self.thread_2.quit()
             del self.thread_2'''
 
-            super(MainWindow, self).closeEvent(event)  # работает и без этого
+            super(ExampleApp, self).closeEvent(event)  # работает и без этого
         else:
             event.ignore()
 
 
-app = QtWidgets.QApplication(sys.argv)
-w = MainWindow()
-w.show()
-exit(app.exec_())
+def main():
+        app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+        window = ExampleApp()  # Создаём объект класса ExampleApp
+        window.show()  # Показываем окно
+        app.exec_()  # и запускаем приложение
+
+
+if __name__ == '__main__':  # Если мы запускаем файл напрямую, а не импортируем
+    main()  # то запускаем функцию main()

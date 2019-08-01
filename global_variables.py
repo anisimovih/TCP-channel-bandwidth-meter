@@ -4,5 +4,4 @@ ip = ''
 port = ''
 filename = ''
 size = ''
-console = 1
 thread_1 = False
