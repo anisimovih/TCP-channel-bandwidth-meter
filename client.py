@@ -43,7 +43,7 @@ def connect_to_server(ip, port, size, filename):
 
                     """вывод в файл"""
                     writer.writerow(results)
-                    csv_file.flush
+                    #csv_file.flush
 
                     '''if number == 50:
                         break'''
@@ -63,4 +63,9 @@ def connect_to_server(ip, port, size, filename):
         except ConnectionRefusedError:
             print("wrong port")
         global_variables.thread_1 = False
+
+
+if __name__ == '__main__':
+    print("Started...")
+    connect_to_server("127.0.0.1", 10002, 1000, "client.csv")
 

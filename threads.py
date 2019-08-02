@@ -1,6 +1,7 @@
 import global_variables
 
 from client import connect_to_server
+from server import connect_to_client
 from PyQt5.QtCore import (QThread, pyqtSignal)
 
 
@@ -16,10 +17,17 @@ class AThread(QThread):
         # Аргументы pyqtSignal определяют типы объектов, которые будут emit (испускаться) на этом сигнале
         self.threadSignalAThread.emit(1)  # значение в скобках пока не выяснил
         global_variables.graph_active = True
-        connect_to_server(global_variables.ip,
-                          global_variables.port,
-                          global_variables.size,
-                          global_variables.filename)
+        if global_variables.what_to_join == "s":
+            connect_to_server(global_variables.ip,
+                              global_variables.port,
+                              global_variables.size,
+                              global_variables.filename)
+        else:
+            connect_to_client(int(global_variables.port),
+                              int(global_variables.size),
+                              global_variables.filename)
+            print("End!")
+
         '''count = 1
         while True:
             global_variables.graph_y.append(count)

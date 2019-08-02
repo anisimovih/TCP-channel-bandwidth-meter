@@ -4,4 +4,6 @@ ip = ''
 port = ''
 filename = ''
 size = ''
-thread_1 = False
+thread_1_active= False
+what_to_join = 's'
+#wait = False
