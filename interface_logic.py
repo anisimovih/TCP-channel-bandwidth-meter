@@ -1,12 +1,6 @@
 import sys  # sys нужен для передачи argv в QApplication
-from PyQt5 import QtWidgets
 import csv
 import os.path
-import client_gui
-import server_gui
-import choise_gui
-import global_variables
-import PyQt5
 
 from graph import MyDynamicMplCanvas
 from catching_fall_errors import log_uncaught_exceptions
@@ -14,20 +8,23 @@ from threads import AThread
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import (QMessageBox)
 
+import client_gui
+import server_gui
+import choise_gui
+import global_variables
+
 sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слотах, если приложение просто падает без стека
 
 
-class ClientWindow(QtWidgets.QMainWindow, client_gui.Ui_client_window):
+class WorkingWindow(QtWidgets.QMainWindow):
     def __init__(self):
         # Это здесь нужно для доступа к переменным, методам
         # и т.д. в файле design.py
         super().__init__()
-        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
-        ''''добавляем график'''
-        dc = MyDynamicMplCanvas(self.centralwidget, width=5, height=4, dpi=100)
-        self.gridLayout.addWidget(dc, 0, 0, 1, 4)
 
-        self.start_button.clicked.connect(self.on_start_button_click)
+
+
+        #self.start_button.clicked.connect(self.on_start_button_click)
 
         self.thread_2 = None
         self.thread = None
@@ -38,10 +35,7 @@ class ClientWindow(QtWidgets.QMainWindow, client_gui.Ui_client_window):
         self.objThread = None
 
         #self.stop_button.clicked.connect(self.on_stop_button_click)
-        self.entered_ip.setText("127.0.0.1")
-        self.entered_port.setText("10002")
-        self.entered_size.setText("1000")
-        self.entered_filename.setText("client.csv")
+
 
         timer = QtCore.QTimer(self)
         timer.timeout.connect(self.printing_to_console)
@@ -89,6 +83,7 @@ class ClientWindow(QtWidgets.QMainWindow, client_gui.Ui_client_window):
             '''self.thread_2.terminate()
             self.thread_2 = None'''
             self.start_button.setText("Start AThread(QThread)")
+            #on_stop_thread
 
     def close_event(self, event):
         reply = QMessageBox.question \
@@ -110,17 +105,38 @@ class ClientWindow(QtWidgets.QMainWindow, client_gui.Ui_client_window):
             event.ignore()
 
 
-class ServerWindow(QtWidgets.QMainWindow, server_gui.Ui_server_window):
+class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
     def __init__(self):
-        # Это здесь нужно для доступа к переменным, методам
-        # и т.д. в файле design.py
         super().__init__()
-        self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+        self.setupUi(self)
+        ''''добавляем график'''
+        dc = MyDynamicMplCanvas(self.centralwidget, width=5, height=4, dpi=100)
+        self.gridLayout.addWidget(dc, 1, 0, 1, 4)
+        self.start_button.clicked.connect(self.on_start_button_click)
+
+        self.entered_ip.setText("127.0.0.1")
+        self.entered_port.setText("10002")
+        self.entered_size.setText("1000")
+        self.entered_filename.setText("client.csv")
+
+
+class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        ''''добавляем график'''
+        dc = MyDynamicMplCanvas(self.centralwidget, width=5, height=4, dpi=100)
+        self.gridLayout.addWidget(dc, 1, 0, 1, 4)
+        self.start_button.clicked.connect(self.on_start_button_click)
+
+        #self.entered_ip.setText("127.0.0.1")
+        self.entered_port.setText("10002")
+        self.entered_size.setText("1000")
+        self.entered_filename.setText("client.csv")
 
 
 class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):
     def __init__(self):
-        #super(CrossWindow, self).__init__()
         super().__init__()
         self.setupUi(self)
         self.client_window = ClientWindow()
@@ -130,12 +146,14 @@ class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):
 
     def show_client(self):
         self.close()
-        self.client_window.stop_button.clicked.connect(lambda: self.show_server())
-        self.client_window.stop_button.clicked.connect(self.client_window.close)
+        # FIXME:  заменить pushButton на change_to_server_button
+        self.client_window.pushButton.clicked.connect(lambda: self.show_server())
+        self.client_window.pushButton.clicked.connect(self.client_window.close)
         self.client_window.show()
 
     def show_server(self):
         self.close()
+        # FIXME:  buton не хватает t
         self.server_window.change_to_client_buton.clicked.connect(lambda: self.show_client())
         self.server_window.change_to_client_buton.clicked.connect(self.server_window.close)
         self.server_window.show()
