@@ -3,6 +3,8 @@ import global_variables
 from client import connect_to_server
 from server import connect_to_client
 from PyQt5.QtCore import (QThread, pyqtSignal)
+#from interface_logic import WorkingWindow
+import interface_logic
 
 
 # Подклассификация QThread
@@ -18,10 +20,15 @@ class AThread(QThread):
         self.threadSignalAThread.emit(1)  # значение в скобках пока не выяснил
         global_variables.graph_active = True
         if global_variables.what_to_join == "s":
+            print(global_variables.ip,
+                int(global_variables.port),
+                int(global_variables.size),
+                global_variables.filename)
             connect_to_server(global_variables.ip,
-                              global_variables.port,
-                              global_variables.size,
+                              int(global_variables.port),
+                              int(global_variables.size),
                               global_variables.filename)
+            #interface_logic.WorkingWindow.stop_thread(interface_logic.CrossWindow.client_window)
         else:
             connect_to_client(int(global_variables.port),
                               int(global_variables.size),

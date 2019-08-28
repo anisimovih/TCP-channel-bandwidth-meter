@@ -27,10 +27,6 @@ class Ui_server_window(object):
         self.entered_size = QtWidgets.QLineEdit(self.centralwidget)
         self.entered_size.setObjectName("entered_size")
         self.gridLayout.addWidget(self.entered_size, 4, 3, 1, 1)
-        self.stop_button = QtWidgets.QPushButton(self.centralwidget)
-        self.stop_button.setStyleSheet("background-color: rgb(204, 0, 0);")
-        self.stop_button.setObjectName("stop_button")
-        self.gridLayout.addWidget(self.stop_button, 5, 3, 1, 1)
         self.entered_port = QtWidgets.QLineEdit(self.centralwidget)
         self.entered_port.setObjectName("entered_port")
         self.gridLayout.addWidget(self.entered_port, 4, 1, 1, 1)
@@ -59,7 +55,7 @@ class Ui_server_window(object):
         self.change_to_client_button = QtWidgets.QPushButton(self.centralwidget)
         self.change_to_client_button.setMaximumSize(QtCore.QSize(400, 16777215))
         self.change_to_client_button.setObjectName("change_to_client_button")
-        self.gridLayout.addWidget(self.change_to_client_button, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.change_to_client_button, 5, 3, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
         server_window.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(server_window)
@@ -76,7 +72,6 @@ class Ui_server_window(object):
     def retranslateUi(self, server_window):
         _translate = QtCore.QCoreApplication.translate
         server_window.setWindowTitle(_translate("server_window", "SpeedTest(server)"))
-        self.stop_button.setText(_translate("server_window", "Stop"))
         self.filename_label.setText(_translate("server_window", "Filename:"))
         self.size_label.setText(_translate("server_window", "Size:"))
         self.port_label.setText(_translate("server_window", "Port:"))

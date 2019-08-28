@@ -13,18 +13,24 @@ def connect_to_server(ip, port, size, filename):
 
         try:
             with socket.create_connection((ip, port)) as sock:
-                #with open(filename, "a", newline='') as csv_file:
-
-
+                # with open(filename, "a", newline='') as csv_file:
                 """начало отправки данных"""
-                while True:
+                # while True:
+
+                "попытка отправлять системное время, проблема в неизвестном пинге"
+                '''delta_time = str(time.time()).encode('utf-8')
+                print(len(delta_time))
+                for i in range(3, 21):
+                    b[i] = delta_time[i-3]
+                sock.sendall(b)'''
+
+                while global_variables.thread_1_active:
                 # try:
                     b[0] += 1
                     start_time = time.time()
                     sock.sendall(b)
                     time.sleep(0.1)
                     end_time = time.time()
-
 
                     """рассчет основных параметров"""
                     delta = format(end_time - start_time, '8f')
@@ -33,13 +39,11 @@ def connect_to_server(ip, port, size, filename):
                     number = b[0] + b[1] * 255 + b[2] * 65025
                     #size = len(b)
 
-
                     """вывод в консоль"""
                     print('start_time = {st}, end_time = {end}, delta = {dell}, '
                           'number = {num}, size = {sz}, speed = {sp}'.
                           format(st=start_time, end=end_time, dell=delta, num=number, sz=size, sp=speed))
                     results = [start_time, end_time, delta, number, size, speed]
-
 
                     """вывод в файл"""
                     writer.writerow(results)
@@ -62,7 +66,10 @@ def connect_to_server(ip, port, size, filename):
                     print("send data error:", ex)'''
         except ConnectionRefusedError:
             print("wrong port")
-        global_variables.thread_1 = False
+            global_variables.thread_1_active = False
+            global_variables.termination_reason = "Connection refused"
+
+    print("client stopped")
 
 
 if __name__ == '__main__':
