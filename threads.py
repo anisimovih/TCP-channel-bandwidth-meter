@@ -33,7 +33,7 @@ class AThread(QThread):
             connect_to_client(int(global_variables.port),
                               int(global_variables.size),
                               global_variables.filename)
-            print("End!")
+            #print("End!")
 
         '''count = 1
         while True:

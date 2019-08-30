@@ -54,5 +54,5 @@ class MyDynamicMplCanvas(MyMplCanvas):
 
             global_variables.graph_len += 1
             self.draw()
-            print("дорисовал линию от ", global_variables.graph_len - 2, ", ", global_variables.graph_y[global_variables.graph_len - 2],
-                " до ", global_variables.graph_len-1, ", ", global_variables.graph_y[global_variables.graph_len - 1])
+            '''print("дорисовал линию от ", global_variables.graph_len - 2, ", ", global_variables.graph_y[global_variables.graph_len - 2],
+                " до ", global_variables.graph_len-1, ", ", global_variables.graph_y[global_variables.graph_len - 1])'''

@@ -14,6 +14,7 @@ from PyQt5.Qt import (QMessageBox)
 import client_gui
 import server_gui
 import choise_gui
+import client
 import global_variables
 
 sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слотах, если приложение просто падает без стека
@@ -92,18 +93,25 @@ class WorkingWindow(QtWidgets.QMainWindow):
             self.start_button.setStyleSheet("background-color: rgb(204, 0, 0)")
             self.start_button.setText("Stop")
         else:
-            self.stop_thread()
+            self.stop_server()
 
     def stop_thread(self):
-        if global_variables.thread_1_active:
-            #self.thread.terminate()
-            global_variables.thread_1_active = False
+        global_variables.thread_1_active = False
         self.thread = None
         '''self.thread_2.terminate()
         self.thread_2 = None'''
         self.start_button.setStyleSheet("background-color: rgb(78, 154, 6)")
         self.start_button.setText("Start")
         self.console.append(global_variables.termination_reason)
+
+    @staticmethod
+    def stop_server():
+        global_variables.thread_1_active = False
+        # Если это сервер, то делаем пустой коннект, чтобы выйти из ожидания.
+        if global_variables.what_to_join == 'c':
+            with open("user_prefs.txt", "r") as user_prefs:
+                text = user_prefs.read().splitlines()
+                client.connect_to_server(text[0], int(text[1]), int(text[2]), text[3])
 
     def close_event(self, event):
         reply = QMessageBox.question \
@@ -171,17 +179,19 @@ class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):
         window_name.show()
 
     def buttons_connect(self):
-        self.client_window.change_to_server_button.clicked.connect(lambda: self.change_window(self.client_window, self.server_window, 's'))
-        self.server_window.change_to_client_button.clicked.connect(lambda: self.change_window(self.server_window, self.client_window, 'c'))
+        self.client_window.change_to_server_button.clicked.connect(lambda: self.change_window(self.client_window, self.server_window, 'c'))
+        self.server_window.change_to_client_button.clicked.connect(lambda: self.change_window(self.server_window, self.client_window, 's'))
 
     @staticmethod
     def change_window(from_window, to_window, window_abr):
         to_window.add_graph()
+        if global_variables.thread_1_active:
+            from_window.stop_thread()
         from_window.graph.deleteLater()
         global_variables.what_to_join = window_abr
-        from_window.stop_thread()
+        '''from_window.stop_thread()
         if global_variables.thread_1_active and window_abr == 'c':
-            to_window.stop_thread()
+            to_window.stop_thread()'''
         from_window.close()
         to_window.show()
 

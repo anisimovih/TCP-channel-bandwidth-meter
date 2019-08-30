@@ -17,7 +17,7 @@ def connect_to_server(ip, port, size, filename):
                 """начало отправки данных"""
                 # while True:
 
-                "попытка отправлять системное время, проблема в неизвестном пинге"
+                "Отправка системного времени, проблема в неизвестном пинге."
                 '''delta_time = str(time.time()).encode('utf-8')
                 print(len(delta_time))
                 for i in range(3, 21):
@@ -37,7 +37,6 @@ def connect_to_server(ip, port, size, filename):
                     speed = float(size) / (end_time - start_time)
                     global_variables.graph_y.append(speed)
                     number = b[0] + b[1] * 255 + b[2] * 65025
-                    #size = len(b)
 
                     """вывод в консоль"""
                     print('start_time = {st}, end_time = {end}, delta = {dell}, '
@@ -66,8 +65,9 @@ def connect_to_server(ip, port, size, filename):
                     print("send data error:", ex)'''
         except ConnectionRefusedError:
             print("wrong port")
+            global_variables.termination_reason = "Подключение не удалось"
             global_variables.thread_1_active = False
-            global_variables.termination_reason = "Connection refused"
+            #global_variables.termination_reason = "Connection refused"
 
     print("client stopped")
 
