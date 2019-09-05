@@ -10,6 +10,7 @@ def connect_to_server(ip, port, size, filename):
         writer.writerow(["start_time", "end_time", "delta", "number", "size", "speed"])
 
         b = bytearray(int(size))
+        data = bytearray(int(size))
 
         try:
             with socket.create_connection((ip, port)) as sock:
@@ -25,26 +26,40 @@ def connect_to_server(ip, port, size, filename):
                 sock.sendall(b)'''
 
                 while global_variables.thread_1_active:
-                # try:
                     b[0] += 1
-                    start_time = time.time()
+
+                    time.sleep(5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                     sock.sendall(b)
-                    time.sleep(0.1)
+
+
+                    """Прием ответа от сервера."""
+                    buf = memoryview(data)
+                    save_size = size
+                    start_time = time.time()
+                    while save_size:
+                        buf_len = sock.recv_into(buf, save_size)
+                        buf = buf[buf_len:]
+                        save_size -= buf_len
+                        if not global_variables.thread_1_active:
+                            break
                     end_time = time.time()
 
-                    """рассчет основных параметров"""
+                    """Рассчет основных параметров."""
                     delta = format(end_time - start_time, '8f')
                     speed = float(size) / (end_time - start_time)
-                    global_variables.graph_y.append(speed)
                     number = b[0] + b[1] * 255 + b[2] * 65025
 
-                    """вывод в консоль"""
+                    graph_append_y(start_time, size, speed)  # Создание массива для нового графика.
+
+
+                    """Вывод в консоль."""
                     print('start_time = {st}, end_time = {end}, delta = {dell}, '
                           'number = {num}, size = {sz}, speed = {sp}'.
                           format(st=start_time, end=end_time, dell=delta, num=number, sz=size, sp=speed))
                     results = [start_time, end_time, delta, number, size, speed]
 
-                    """вывод в файл"""
+                    """Вывод в файл."""
                     writer.writerow(results)
                     #csv_file.flush
 
@@ -70,6 +85,30 @@ def connect_to_server(ip, port, size, filename):
             #global_variables.termination_reason = "Connection refused"
 
     print("client stopped")
+
+
+
+def graph_append_y(start_time, size, speed):
+    """Создание массива для нового графика."""
+    '''global_variables.time_stack.append(float(start_time))
+    global_variables.time_stack_end.append(float(start_time))
+
+    if len(global_variables.time_stack) > global_variables.time_stack_length:
+        global_variables.time_stack.pop(0)
+        global_variables.time_stack_end.pop(0)
+
+    if len(global_variables.time_stack) == global_variables.time_stack_length:
+        stack_speed = global_variables.time_stack_end[global_variables.time_stack_length - 1] - \
+                      global_variables.time_stack[0]
+
+        # Проверка работы графика, в условиях переодического прибывания большого колличества пакетов.
+        for i in range(0, 9):
+            global_variables.graph_y.append((size / stack_speed * global_variables.time_stack_length) + i)
+        time.sleep(2)'''
+
+        #global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
+
+    global_variables.graph_y.append(speed)
 
 
 if __name__ == '__main__':

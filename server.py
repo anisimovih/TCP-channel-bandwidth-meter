@@ -12,7 +12,7 @@ def connect_to_client(port, size, filename):
         """ожидание подключения"""
         with socket.socket() as sock:
             sock.bind(("", port))
-            sock.listen()
+            sock.listen(1)
 
             while global_variables.thread_1_active:
                 conn, addr = sock.accept()  # кортеж с двумя элементами: новый сокет и адрес клиента
@@ -55,23 +55,7 @@ def connect_to_client(port, size, filename):
                         b.decode()
                         new_delta = time.time() - float(b)'''
 
-                        """Создание массива для нового графика"""
-                        global_variables.time_stack.append(float(start_time))
-                        global_variables.time_stack_end.append(float(end_time))
-
-                        if len(global_variables.time_stack) > global_variables.time_stack_length:
-                            global_variables.time_stack.pop(0)
-                            global_variables.time_stack_end.pop(0)
-
-                        if len(global_variables.time_stack) == global_variables.time_stack_length:
-                            stack_speed = global_variables.time_stack_end[global_variables.time_stack_length - 1] - global_variables.time_stack[0]
-
-                            """Проверка работы графика, в условиях переодического прибывания большого колличества пакетов."""
-                            '''for i in range(0, 9):
-                                global_variables.graph_y.append((size / stack_speed * global_variables.time_stack_length) + i)
-                            time.sleep(2)'''
-
-                            global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
+                        graph_append_y(start_time, size, speed)  # Создание массива для нового графика.
 
                         """вывод в консоль"""
                         print('start_time = {st}, end_time = {end}, delta = {dell}, number = {num}, size = {sz}, speed = {sp}'.
@@ -81,9 +65,39 @@ def connect_to_client(port, size, filename):
                         """вывод в файл"""
                         writer.writerow(results)
 
+                        time.sleep(5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                        """Отвечаем клиенту"""
+                        conn.send(data)
+
         #sock.shutdown(socket.SHUT_RDWR)
         sock.close()
         global_variables.termination_reason = "Прием данных остановлен"
+        print("server closed")
+
+
+def graph_append_y(start_time, size, speed):
+    """Создание массива для нового графика."""
+    '''global_variables.time_stack.append(float(start_time))
+    global_variables.time_stack_end.append(float(start_time))
+
+    if len(global_variables.time_stack) > global_variables.time_stack_length:
+        global_variables.time_stack.pop(0)
+        global_variables.time_stack_end.pop(0)
+
+    if len(global_variables.time_stack) == global_variables.time_stack_length:
+        stack_speed = global_variables.time_stack_end[global_variables.time_stack_length - 1] - \
+                      global_variables.time_stack[0]
+
+        # Проверка работы графика, в условиях переодического прибывания большого колличества пакетов.
+        for i in range(0, 9):
+            global_variables.graph_y.append((size / stack_speed * global_variables.time_stack_length) + i)
+        time.sleep(2)'''
+
+    # global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
+
+    global_variables.graph_y.append(speed)
+
 
 if __name__ == '__main__':
     print("Started...")

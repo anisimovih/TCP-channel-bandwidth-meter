@@ -1,12 +1,9 @@
 # TODO: поменять бесконечные циклы на зависимые от перемнных через поток
 import sys  # sys нужен для передачи argv в QApplication
-import csv
-import os.path
-import socket
 
 from graph import MyDynamicMplCanvas
 from catching_fall_errors import log_uncaught_exceptions
-#from threads import AThread
+
 import threads
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import (QMessageBox)
@@ -65,10 +62,10 @@ class WorkingWindow(QtWidgets.QMainWindow):
                                        self.entered_size.text().rstrip() + '\n',
                                        text[3] + '\n',
                                        self.entered_filename.text().rstrip()])
-    @QtCore.pyqtSlot()
+    """@QtCore.pyqtSlot()
     def on_stop_button_click(self):
         # self.close()
-        self.switch_on_server()
+        self.switch_on_server()"""
 
     '''ИСПРАВИТЬ: выводит результаты только после окончания передачи'''
     '''def printing_to_console(self):
@@ -84,7 +81,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
         if self.thread is None:
             self.thread = threads.AThread()
             self.thread.finished.connect(lambda: self.stop_thread())
-            global_variables.clint_active = True
+            #global_variables.clint_active = True
             self.thread.start()
             # self.thread_2 = BThread()
             # self.thread.finished.connect(self.finished_a_thread)  # если поток может закончить выполнение
@@ -111,7 +108,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
         if global_variables.what_to_join == 'c':
             with open("user_prefs.txt", "r") as user_prefs:
                 text = user_prefs.read().splitlines()
-                client.connect_to_server(text[0], int(text[1]), int(text[2]), text[3])
+                client.connect_to_server("127.0.0.1", int(text[1]), int(text[2]), text[3])
 
     def close_event(self, event):
         reply = QMessageBox.question \

@@ -19,11 +19,11 @@ class AThread(QThread):
         # Аргументы pyqtSignal определяют типы объектов, которые будут emit (испускаться) на этом сигнале
         self.threadSignalAThread.emit(1)  # значение в скобках пока не выяснил
         global_variables.graph_active = True
+        print(global_variables.ip,
+              int(global_variables.port),
+              int(global_variables.size),
+              global_variables.filename)
         if global_variables.what_to_join == "s":
-            print(global_variables.ip,
-                int(global_variables.port),
-                int(global_variables.size),
-                global_variables.filename)
             connect_to_server(global_variables.ip,
                               int(global_variables.port),
                               int(global_variables.size),
