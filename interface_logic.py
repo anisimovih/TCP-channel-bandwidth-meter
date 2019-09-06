@@ -23,23 +23,15 @@ class WorkingWindow(QtWidgets.QMainWindow):
         # и т.д. в файле design.py
         super().__init__()
 
-        self.thread_2 = None
         self.thread = None
-        self.objThread = None
-
         self.graph = None
-
-
-        '''timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.printing_to_console)
-        timer.start(500)'''
 
     '''explanation to @QtCore.pyqtSlot:
        provide a C++ signature for method, thereby reduce the amount of memory used and is slightly faster'''
     @QtCore.pyqtSlot()
-    def on_start_button_click(self, need_of_ip):
+    def on_start_button_click(self):
         self.save_user_prefs()
-        if need_of_ip:
+        if global_variables.what_to_join == 's':
             global_variables.ip = self.entered_ip.text()
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
@@ -62,10 +54,6 @@ class WorkingWindow(QtWidgets.QMainWindow):
                                        self.entered_size.text().rstrip() + '\n',
                                        text[3] + '\n',
                                        self.entered_filename.text().rstrip()])
-    """@QtCore.pyqtSlot()
-    def on_stop_button_click(self):
-        # self.close()
-        self.switch_on_server()"""
 
     '''ИСПРАВИТЬ: выводит результаты только после окончания передачи'''
     '''def printing_to_console(self):
@@ -110,7 +98,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
                 text = user_prefs.read().splitlines()
                 client.connect_to_server("127.0.0.1", int(text[1]), int(text[2]), text[3])
 
-    def close_event(self, event):
+    def closeEvent(self, event):
         reply = QMessageBox.question \
             (self, 'Информация',
              "Вы уверены, что хотите закрыть приложение?",
@@ -120,12 +108,6 @@ class WorkingWindow(QtWidgets.QMainWindow):
             if self.thread:
                 self.thread.quit()
             del self.thread
-
-            '''if self.thread_2:
-                self.thread_2.quit()
-            del self.thread_2'''
-
-            super(ClientWindow, self).close_event(event)  # работает и без этого
         else:
             event.ignore()
 
@@ -138,7 +120,7 @@ class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.start_button.clicked.connect(lambda: self.on_start_button_click(True))
+        self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
             self.entered_ip.setText(text[0])
@@ -151,7 +133,7 @@ class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.start_button.clicked.connect(lambda: self.on_start_button_click(False))
+        self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
             self.entered_port.setText(text[1])
@@ -183,12 +165,9 @@ class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):
     def change_window(from_window, to_window, window_abr):
         to_window.add_graph()
         if global_variables.thread_1_active:
-            from_window.stop_thread()
+            from_window.on_start_button_click()
         from_window.graph.deleteLater()
         global_variables.what_to_join = window_abr
-        '''from_window.stop_thread()
-        if global_variables.thread_1_active and window_abr == 'c':
-            to_window.stop_thread()'''
         from_window.close()
         to_window.show()
 

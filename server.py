@@ -32,43 +32,29 @@ def connect_to_client(port, size, filename):
                             buf_len = conn.recv_into(buf, save_size)
                             buf = buf[buf_len:]
                             save_size -= buf_len
-                            if global_variables.thread_1_active == False:
+                            if not global_variables.thread_1_active:
                                 break
-                            # print('received ', 100/size*(size-save_size),'%')
+                        end_time = time.time()
 
                         """выход на ожидание новых данных при отсутствии передачи"""
-                        end_time = time.time()
                         if not data:
                             break
 
                         """рассчет основных параметров"""
                         delta = format(end_time - start_time, '8f')
                         speed = size / (end_time - start_time)
-                        #global_variables.graph_y.append(speed)####
-                        size = size
                         number = data[0] + data[1] * 255 + data[2] * 65025
 
-                        "вычесление скорости, основанное на разнице системного времени"
-                        '''b = bytearray(18)
-                        for i in range(0, 18):
-                            b[i] = data[i + 3]
-                        b.decode()
-                        new_delta = time.time() - float(b)'''
+                        graph_append_y(speed)  # Обычный график.
+                        # graph_append_y_average(start_time, size)  # Усредненный график.
 
-                        graph_append_y(start_time, size, speed)  # Создание массива для нового графика.
-
-                        """вывод в консоль"""
                         print('start_time = {st}, end_time = {end}, delta = {dell}, number = {num}, size = {sz}, speed = {sp}'.
                               format(st=start_time, end=end_time, dell=delta, num=number, sz=size, sp=speed))
-                        results = [start_time, end_time, delta, number, size, speed]
+                        results = [start_time, end_time, delta, number, size, speed]  # Переменная для записи в CSV.
 
-                        """вывод в файл"""
-                        writer.writerow(results)
-
+                        writer.writerow(results)  # Вывод в файл.
                         time.sleep(5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-                        """Отвечаем клиенту"""
-                        conn.send(data)
+                        conn.send(data)  # Отвечаем клиенту.
 
         #sock.shutdown(socket.SHUT_RDWR)
         sock.close()
@@ -76,9 +62,14 @@ def connect_to_client(port, size, filename):
         print("server closed")
 
 
-def graph_append_y(start_time, size, speed):
+def graph_append_y(speed):
     """Создание массива для нового графика."""
-    '''global_variables.time_stack.append(float(start_time))
+    global_variables.graph_y.append(speed)
+
+
+def graph_append_y_average(start_time, size):
+    """Создание массива для нового графика."""
+    global_variables.time_stack.append(float(start_time))
     global_variables.time_stack_end.append(float(start_time))
 
     if len(global_variables.time_stack) > global_variables.time_stack_length:
@@ -90,13 +81,11 @@ def graph_append_y(start_time, size, speed):
                       global_variables.time_stack[0]
 
         # Проверка работы графика, в условиях переодического прибывания большого колличества пакетов.
-        for i in range(0, 9):
+        '''for i in range(0, 9):
             global_variables.graph_y.append((size / stack_speed * global_variables.time_stack_length) + i)
         time.sleep(2)'''
 
-    # global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
-
-    global_variables.graph_y.append(speed)
+        global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
 
 
 if __name__ == '__main__':

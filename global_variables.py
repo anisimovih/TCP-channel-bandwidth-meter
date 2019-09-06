@@ -11,8 +11,3 @@ termination_reason = ''  #
 time_stack_length = 20  # Размер усреднения.
 time_stack = []  # Массив времен начала приема.
 time_stack_end = []  # Массив времен конца приема.
-
-#sum_num = 0  #
-#sum = 0  #
-#count = 0  #
-#set = False  #
