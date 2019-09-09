@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>802</width>
     <height>591</height>
    </rect>
   </property>
@@ -20,26 +20,6 @@
       <property name="verticalSpacing">
        <number>6</number>
       </property>
-      <item row="5" column="0" colspan="2">
-       <widget class="QPushButton" name="start_button">
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(78, 154, 6);</string>
-        </property>
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2" colspan="2">
-       <widget class="QPushButton" name="stop_button">
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(204, 0, 0);</string>
-        </property>
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="3">
        <widget class="QLabel" name="size_label">
         <property name="maximumSize">
@@ -53,31 +33,18 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="4">
-       <widget class="QTextEdit" name="console">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>80</height>
-         </size>
-        </property>
-       </widget>
+      <item row="4" column="4">
+       <widget class="QLineEdit" name="entered_timelimit"/>
       </item>
-      <item row="3" column="2">
-       <widget class="QLabel" name="filename_label">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>15</height>
-         </size>
+      <item row="5" column="0" colspan="2">
+       <widget class="QPushButton" name="start_button">
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(78, 154, 6);</string>
         </property>
         <property name="text">
-         <string>Filename:</string>
+         <string>Start</string>
         </property>
        </widget>
-      </item>
-      <item row="1" column="0" colspan="4">
-       <widget class="QWidget" name="graph_field" native="true"/>
       </item>
       <item row="3" column="1">
        <widget class="QLabel" name="port_label">
@@ -92,6 +59,31 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="3">
+       <widget class="QLineEdit" name="entered_size"/>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="entered_filename"/>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="filename_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>15</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Filename:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="entered_port"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLineEdit" name="entered_ip"/>
+      </item>
       <item row="3" column="0">
        <widget class="QLabel" name="ip_label">
         <property name="maximumSize">
@@ -105,19 +97,14 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="2">
-       <widget class="QLineEdit" name="entered_filename"/>
+      <item row="3" column="4">
+       <widget class="QCheckBox" name="checkBox_timelimit">
+        <property name="text">
+         <string>Time limit(seconds):</string>
+        </property>
+       </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLineEdit" name="entered_ip"/>
-      </item>
-      <item row="4" column="1">
-       <widget class="QLineEdit" name="entered_port"/>
-      </item>
-      <item row="4" column="3">
-       <widget class="QLineEdit" name="entered_size"/>
-      </item>
-      <item row="0" column="1" colspan="2">
+      <item row="5" column="3" colspan="2">
        <widget class="QPushButton" name="change_to_server_button">
         <property name="maximumSize">
          <size>
@@ -130,6 +117,19 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="0" colspan="5">
+       <widget class="QTextEdit" name="console">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>80</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="5">
+       <widget class="QWidget" name="graph_field" native="true"/>
+      </item>
      </layout>
     </item>
    </layout>
@@ -139,7 +139,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>802</width>
      <height>22</height>
     </rect>
    </property>

@@ -33,6 +33,8 @@ class WorkingWindow(QtWidgets.QMainWindow):
         self.save_user_prefs()
         if global_variables.what_to_join == 's':
             global_variables.ip = self.entered_ip.text()
+            if self.checkBox_timelimit.isChecked():
+                global_variables.time_limit = float(self.entered_timelimit.text())
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
         global_variables.size = self.entered_size.text()
@@ -78,7 +80,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
             self.start_button.setStyleSheet("background-color: rgb(204, 0, 0)")
             self.start_button.setText("Stop")
         else:
-            self.stop_server()
+            self.stop()
 
     def stop_thread(self):
         global_variables.thread_1_active = False
@@ -90,15 +92,15 @@ class WorkingWindow(QtWidgets.QMainWindow):
         self.console.append(global_variables.termination_reason)
 
     @staticmethod
-    def stop_server():
+    def stop():
         global_variables.thread_1_active = False
         # Если это сервер, то делаем пустой коннект, чтобы выйти из ожидания.
-        if global_variables.what_to_join == 'c':
+        if global_variables.what_to_join == 'c' and len(global_variables.graph_y) == 1:
             with open("user_prefs.txt", "r") as user_prefs:
                 text = user_prefs.read().splitlines()
                 client.connect_to_server("127.0.0.1", int(text[1]), int(text[2]), text[3])
 
-    def closeEvent(self, event):
+    '''def closeEvent(self, event):
         reply = QMessageBox.question \
             (self, 'Информация',
              "Вы уверены, что хотите закрыть приложение?",
@@ -109,11 +111,11 @@ class WorkingWindow(QtWidgets.QMainWindow):
                 self.thread.quit()
             del self.thread
         else:
-            event.ignore()
+            event.ignore()'''
 
     def add_graph(self):
         self.graph = MyDynamicMplCanvas(self.graph_field, width=5, height=4, dpi=100)
-        self.gridLayout.addWidget(self.graph, 1, 0, 1, 4)
+        self.gridLayout.addWidget(self.graph, 1, 0, 1, 5)
 
 
 class ClientWindow(WorkingWindow, client_gui.Ui_client_window):

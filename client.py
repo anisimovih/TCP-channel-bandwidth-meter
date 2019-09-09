@@ -28,10 +28,11 @@ def connect_to_server(ip, port, size, filename):
                 while global_variables.thread_1_active:
                     b[0] += 1
 
-                    time.sleep(5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    time.sleep(0.5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                     sock.sendall(b)
 
+                    check_time_limit()  # Проверка на ограничение по времени.
 
                     """Прием ответа от сервера."""
                     buf = memoryview(data)
@@ -109,6 +110,17 @@ def graph_append_y(start_time, size, speed):
         #global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
 
     global_variables.graph_y.append(speed)
+
+
+def check_time_limit():
+    if global_variables.time_limit:  # Проверяем галку.
+        if global_variables.time_limit_delta:  # Проходим не первый раз.
+            global_variables.time_limit = global_variables.time_limit - (time.time() - global_variables.time_limit_delta)
+            global_variables.time_limit_delta = time.time()
+            if global_variables.time_limit < 0:
+                global_variables.thread_1_active = False
+        else:  # Проходим первый раз.
+            global_variables.time_limit_delta = time.time()
 
 
 if __name__ == '__main__':

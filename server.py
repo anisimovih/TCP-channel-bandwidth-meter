@@ -32,9 +32,13 @@ def connect_to_client(port, size, filename):
                             buf_len = conn.recv_into(buf, save_size)
                             buf = buf[buf_len:]
                             save_size -= buf_len
-                            if not global_variables.thread_1_active:
+                            if not global_variables.thread_1_active:  # Выход из бесконечного цикла при отключении клиента.
                                 break
                         end_time = time.time()
+
+                        """Выход до завершения цикла для предотвращения лишнего вывода в консоль."""
+                        if not global_variables.thread_1_active:
+                            break
 
                         """выход на ожидание новых данных при отсутствии передачи"""
                         if not data:
@@ -53,7 +57,7 @@ def connect_to_client(port, size, filename):
                         results = [start_time, end_time, delta, number, size, speed]  # Переменная для записи в CSV.
 
                         writer.writerow(results)  # Вывод в файл.
-                        time.sleep(5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        time.sleep(0.5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                         conn.send(data)  # Отвечаем клиенту.
 
         #sock.shutdown(socket.SHUT_RDWR)
