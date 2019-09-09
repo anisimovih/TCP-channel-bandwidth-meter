@@ -25,7 +25,7 @@ class Ui_client_window(object):
         self.size_label.setMaximumSize(QtCore.QSize(16777215, 15))
         self.size_label.setObjectName("size_label")
         self.gridLayout.addWidget(self.size_label, 3, 3, 1, 1)
-        self.entered_timelimit = QtWidgets.QLincleEdit(self.centralwidget)
+        self.entered_timelimit = QtWidgets.QLineEdit(self.centralwidget)
         self.entered_timelimit.setObjectName("entered_timelimit")
         self.gridLayout.addWidget(self.entered_timelimit, 4, 4, 1, 1)
         self.start_button = QtWidgets.QPushButton(self.centralwidget)
