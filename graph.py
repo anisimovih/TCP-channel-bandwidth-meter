@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-import random
 from PyQt5 import QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -25,9 +24,9 @@ class MyDynamicMplCanvas(MyMplCanvas):
     def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
+        self.activator()
         timer.timeout.connect(self.activator)
-        timer.start(100)
-        #self.axes.set_xlabel("mdmdmdk")
+        timer.start(3000)
 
     def activator(self):
         if global_variables.graph_active:
@@ -43,16 +42,38 @@ class MyDynamicMplCanvas(MyMplCanvas):
         self.draw()
 
     def graph_active(self):
-        if global_variables.graph_len < len(global_variables.graph_y):
-            #print(global_variables.graph_len, "<", length)
-            #self.axes.plot([length - 2, length-1], [global_variables.graph_y[length - 2], global_variables.graph_y[length - 1]], 'r')
-            self.axes.plot([global_variables.graph_len - 2,
-                            global_variables.graph_len-1],
-                           [global_variables.graph_y[global_variables.graph_len - 2],
-                            global_variables.graph_y[global_variables.graph_len - 1]],
-                           'r')
+        '''if len(global_variables.graph_y_only) > global_variables.graph_len:
+            self.axes.plot(
+                [
+                    global_variables.graph_y_only[global_variables.graph_len - 1][0],
+                    global_variables.graph_y_only[global_variables.graph_len][0]
+                ],
+                [
+                    global_variables.graph_y_only[global_variables.graph_len - 1][1],
+                    global_variables.graph_y_only[global_variables.graph_len][1]
+                ],
+                'r')
 
             global_variables.graph_len += 1
-            self.draw()
-            '''print("дорисовал линию от ", global_variables.graph_len - 2, ", ", global_variables.graph_y[global_variables.graph_len - 2],
-                " до ", global_variables.graph_len-1, ", ", global_variables.graph_y[global_variables.graph_len - 1])'''
+            self.draw()'''
+
+        if global_variables.graph_len_new < len(global_variables.graph_y):
+
+            if global_variables.last != 0:
+                global_variables.graph_y_only.append([global_variables.graph_len_new - 1, global_variables.last])
+
+                self.axes.plot(
+                    [
+                        global_variables.graph_y_only[global_variables.graph_len - 1][0],
+                        global_variables.graph_y_only[global_variables.graph_len][0]
+                    ],
+                    [
+                        global_variables.graph_y_only[global_variables.graph_len - 1][1],
+                        global_variables.graph_y_only[global_variables.graph_len][1]
+                    ],
+                    'r')
+                global_variables.graph_len += 1
+                self.draw()
+
+            global_variables.last = len(global_variables.graph_y) * int(global_variables.size) / global_variables.graph_y[global_variables.graph_len_new]
+            global_variables.graph_len_new = len(global_variables.graph_y)

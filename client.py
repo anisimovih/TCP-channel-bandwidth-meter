@@ -31,22 +31,12 @@ def connect_to_server(ip, port, size, filename):
                     time.sleep(0.5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
                     sock.sendall(b)
-
-                    check_time_limit()  # Проверка на ограничение по времени.
-
-                    """Прием ответа от сервера."""
-                    buf = memoryview(data)
-                    save_size = size
-                    start_time = time.time()
-                    while save_size:
-                        buf_len = sock.recv_into(buf, save_size)
-                        buf = buf[buf_len:]
-                        save_size -= buf_len
-                        if not global_variables.thread_1_active:
-                            break
+                    #time.sleep(0.1)
                     end_time = time.time()
 
-                    """Рассчет основных параметров."""
+                    check_packet_limit()  # Проверка на ограничение по пакетам.
+
+                    """рассчет основных параметров"""
                     delta = format(end_time - start_time, '8f')
                     speed = float(size) / (end_time - start_time)
                     number = b[0] + b[1] * 255 + b[2] * 65025
@@ -88,39 +78,12 @@ def connect_to_server(ip, port, size, filename):
     print("client stopped")
 
 
-
-def graph_append_y(start_time, size, speed):
-    """Создание массива для нового графика."""
-    '''global_variables.time_stack.append(float(start_time))
-    global_variables.time_stack_end.append(float(start_time))
-
-    if len(global_variables.time_stack) > global_variables.time_stack_length:
-        global_variables.time_stack.pop(0)
-        global_variables.time_stack_end.pop(0)
-
-    if len(global_variables.time_stack) == global_variables.time_stack_length:
-        stack_speed = global_variables.time_stack_end[global_variables.time_stack_length - 1] - \
-                      global_variables.time_stack[0]
-
-        # Проверка работы графика, в условиях переодического прибывания большого колличества пакетов.
-        for i in range(0, 9):
-            global_variables.graph_y.append((size / stack_speed * global_variables.time_stack_length) + i)
-        time.sleep(2)'''
-
-        #global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
-
-    global_variables.graph_y.append(speed)
-
-
-def check_time_limit():
-    if global_variables.time_limit:  # Проверяем галку.
-        if global_variables.time_limit_delta:  # Проходим не первый раз.
-            global_variables.time_limit = global_variables.time_limit - (time.time() - global_variables.time_limit_delta)
-            global_variables.time_limit_delta = time.time()
-            if global_variables.time_limit < 0:
-                global_variables.thread_1_active = False
-        else:  # Проходим первый раз.
-            global_variables.time_limit_delta = time.time()
+def check_packet_limit():
+    if global_variables.packet_limit is not None:  # Проверяем галку.
+        if global_variables.packet_limit > 1:
+            global_variables.packet_limit -= 1
+        else:
+            global_variables.thread_1_active = False
 
 
 if __name__ == '__main__':

@@ -33,8 +33,10 @@ class WorkingWindow(QtWidgets.QMainWindow):
         self.save_user_prefs()
         if global_variables.what_to_join == 's':
             global_variables.ip = self.entered_ip.text()
-            if self.checkBox_timelimit.isChecked():
-                global_variables.time_limit = float(self.entered_timelimit.text())
+
+            if self.checkBox_packetLimit.isChecked():
+                global_variables.packet_limit = int(self.entered_packetLimit.text())
+
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
         global_variables.size = self.entered_size.text()

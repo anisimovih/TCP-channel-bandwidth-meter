@@ -21,75 +21,80 @@ def connect_to_client(port, size, filename):
                 with conn:
                     data = bytearray(int(size))
 
-                    """начало приема данных"""
+                    """Начало приема данных."""
                     while global_variables.thread_1_active:
                         buf = memoryview(data)
                         save_size = size
-                        start_time = time.time()
 
-                        """буфер"""
+                        """Буфер (нужен для обхода разделения пакетов TCP)."""
+                        start_time = time.time()
+                        if global_variables.very_first_time is None:
+                            global_variables.very_first_time = start_time
                         while save_size:
                             buf_len = conn.recv_into(buf, save_size)
                             buf = buf[buf_len:]
                             save_size -= buf_len
                             if not global_variables.thread_1_active:  # Выход из бесконечного цикла при отключении клиента.
                                 break
+                            # print('received ', 100/size*(size-save_size),'%')
                         end_time = time.time()
 
-                        """Выход до завершения цикла для предотвращения лишнего вывода в консоль."""
-                        if not global_variables.thread_1_active:
-                            break
-
-                        """выход на ожидание новых данных при отсутствии передачи"""
+                        """Выход на ожидание новых данных при отсутствии передачи."""
                         if not data:
                             break
 
-                        """рассчет основных параметров"""
+                        """Рассчет основных параметров."""
                         delta = format(end_time - start_time, '8f')
-                        speed = size / (end_time - start_time)
+                        size = size
                         number = data[0] + data[1] * 255 + data[2] * 65025
+                        #speed = graph_append_y_only(number, start_time, end_time, size)
+                        speed = graph_all_y(number, start_time, end_time, size)
 
-                        graph_append_y(speed)  # Обычный график.
-                        # graph_append_y_average(start_time, size)  # Усредненный график.
-
-                        print('start_time = {st}, end_time = {end}, delta = {dell}, number = {num}, size = {sz}, speed = {sp}'.
-                              format(st=start_time, end=end_time, dell=delta, num=number, sz=size, sp=speed))
-                        results = [start_time, end_time, delta, number, size, speed]  # Переменная для записи в CSV.
-
+                        """Вывод в консоль."""
+                        print('start_time = {st}, '
+                              'end_time = {end}, '
+                              'delta = {dell}, '
+                              'number = {num}, '
+                              'size = {sz}, '
+                              'speed = {sp}'.
+                              format(st=start_time,
+                                     end=end_time,
+                                     dell=delta,
+                                     num=number,
+                                     sz=size,
+                                     sp=speed))
+                        results = [start_time, end_time, delta, number, size, speed]
                         writer.writerow(results)  # Вывод в файл.
-                        time.sleep(0.5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        conn.send(data)  # Отвечаем клиенту.
 
         #sock.shutdown(socket.SHUT_RDWR)
         sock.close()
         global_variables.termination_reason = "Прием данных остановлен"
-        print("server closed")
 
 
-def graph_append_y(speed):
-    """Создание массива для нового графика."""
-    global_variables.graph_y.append(speed)
+'''def graph_append_y_only(number, start_time, end_time, size):
+    delta = end_time - global_variables.very_first_time
+    recv_amount = number * size
+    speed = recv_amount / delta
+    if (end_time - start_time) > 0.01:
+        global_variables.graph_y_only.append([number, speed])
+        print(global_variables.graph_y_only)
+    return speed'''
 
 
-def graph_append_y_average(start_time, size):
-    """Создание массива для нового графика."""
-    global_variables.time_stack.append(float(start_time))
-    global_variables.time_stack_end.append(float(start_time))
+def graph_all_y(number, start_time, end_time, size):
+    delta = end_time - global_variables.very_first_time
+    recv_amount = number * size
+    speed = recv_amount / delta
+    global_variables.graph_y.append(delta)
+    #global_variables.graph_y.append(speed)
+    return speed
 
-    if len(global_variables.time_stack) > global_variables.time_stack_length:
-        global_variables.time_stack.pop(0)
-        global_variables.time_stack_end.pop(0)
 
-    if len(global_variables.time_stack) == global_variables.time_stack_length:
-        stack_speed = global_variables.time_stack_end[global_variables.time_stack_length - 1] - \
-                      global_variables.time_stack[0]
-
-        # Проверка работы графика, в условиях переодического прибывания большого колличества пакетов.
-        '''for i in range(0, 9):
-            global_variables.graph_y.append((size / stack_speed * global_variables.time_stack_length) + i)
-        time.sleep(2)'''
-
-        global_variables.graph_y.append(size / stack_speed * global_variables.time_stack_length)
+def graph_all_y_2(number, start_time, end_time, size):
+    delta = end_time - global_variables.very_first_time
+    recv_amount = number * size
+    speed = recv_amount / delta
+    return speed
 
 
 if __name__ == '__main__':
