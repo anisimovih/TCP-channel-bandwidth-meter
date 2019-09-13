@@ -29,8 +29,10 @@ def connect_to_server(ip, port, size, filename):
                     b[0] += 1
                     start_time = time.time()
                     sock.sendall(b)
-                    time.sleep(0.1)
+                    #time.sleep(0.1)
                     end_time = time.time()
+
+                    check_packet_limit()  # Проверка на ограничение по пакетам.
 
                     """рассчет основных параметров"""
                     delta = format(end_time - start_time, '8f')
@@ -70,6 +72,14 @@ def connect_to_server(ip, port, size, filename):
             #global_variables.termination_reason = "Connection refused"
 
     print("client stopped")
+
+
+def check_packet_limit():
+    if global_variables.packet_limit is not None:  # Проверяем галку.
+        if global_variables.packet_limit > 1:
+            global_variables.packet_limit -= 1
+        else:
+            global_variables.thread_1_active = False
 
 
 if __name__ == '__main__':

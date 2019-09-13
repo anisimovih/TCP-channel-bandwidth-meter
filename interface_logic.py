@@ -40,10 +40,12 @@ class WorkingWindow(QtWidgets.QMainWindow):
     '''explanation to @QtCore.pyqtSlot:
        provide a C++ signature for method, thereby reduce the amount of memory used and is slightly faster'''
     @QtCore.pyqtSlot()
-    def on_start_button_click(self, need_of_ip):
+    def on_start_button_click(self):
         self.save_user_prefs()
-        if need_of_ip:
+        if global_variables.what_to_join == 's':
             global_variables.ip = self.entered_ip.text()
+            if self.checkBox_packetLimit.isChecked():
+                global_variables.packet_limit = int(self.entered_packetLimit.text())
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
         global_variables.size = self.entered_size.text()
@@ -134,14 +136,14 @@ class WorkingWindow(QtWidgets.QMainWindow):
 
     def add_graph(self):
         self.graph = MyDynamicMplCanvas(self.graph_field, width=5, height=4, dpi=100)
-        self.gridLayout.addWidget(self.graph, 1, 0, 1, 4)
+        self.gridLayout.addWidget(self.graph, 1, 0, 1, 5)
 
 
 class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.start_button.clicked.connect(lambda: self.on_start_button_click(True))
+        self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
             self.entered_ip.setText(text[0])
@@ -154,7 +156,7 @@ class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        self.start_button.clicked.connect(lambda: self.on_start_button_click(False))
+        self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
             self.entered_port.setText(text[1])

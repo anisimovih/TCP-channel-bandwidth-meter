@@ -1,5 +1,5 @@
 graph_y = [0]  # Координата Y графика
-graph_len = 2  # Координата X !!!отрисованного!!! графика.
+graph_len = 1  # Координата X !!!отрисованного!!! графика.
 graph_active = False  # Активность графика.
 ip = ''
 port = ''
@@ -16,3 +16,14 @@ time_stack_end = []  # Массив времен конца приема.
 #sum = 0  #
 #count = 0  #
 #set = False  #
+packet_limit = None
+very_first_time = None
+
+
+plot_end = 1
+
+graph_y_only = [[0, 0]]  # [x, y] адекватных результатов
+last = 0
+
+#graph_y_new = [0]
+graph_len_new = 1
