@@ -2,6 +2,8 @@ import socket
 import time
 import csv
 import global_variables
+from graph import Graph
+import numpy as np
 
 
 def connect_to_client(port, size, filename):
@@ -47,8 +49,8 @@ def connect_to_client(port, size, filename):
                         delta = format(end_time - start_time, '8f')
                         size = size
                         number = data[0] + data[1] * 255 + data[2] * 65025
-                        #speed = graph_append_y_only(number, start_time, end_time, size)
-                        speed = graph_all_y(number, start_time, end_time, size)
+                        #speed = graph_all_y(number, start_time, end_time, size)
+                        speed = smoothing_graph(number, start_time, end_time, size)
 
                         """Вывод в консоль."""
                         print('start_time = {st}, '
@@ -71,29 +73,17 @@ def connect_to_client(port, size, filename):
         global_variables.termination_reason = "Прием данных остановлен"
 
 
-'''def graph_append_y_only(number, start_time, end_time, size):
-    delta = end_time - global_variables.very_first_time
-    recv_amount = number * size
-    speed = recv_amount / delta
-    if (end_time - start_time) > 0.01:
-        global_variables.graph_y_only.append([number, speed])
-        print(global_variables.graph_y_only)
-    return speed'''
+def smoothing_graph(number, start_time, end_time, size):
+    total_delta = end_time - global_variables.very_first_time
+    total_amount = number * size
+    speed = total_amount / total_delta * 8
+    '''if number % 10 == 0:
+        speed = 20000'''
 
-
-def graph_all_y(number, start_time, end_time, size):
-    delta = end_time - global_variables.very_first_time
-    recv_amount = number * size
-    speed = recv_amount / delta
-    global_variables.graph_y.append(delta)
-    #global_variables.graph_y.append(speed)
-    return speed
-
-
-def graph_all_y_2(number, start_time, end_time, size):
-    delta = end_time - global_variables.very_first_time
-    recv_amount = number * size
-    speed = recv_amount / delta
+    if speed < Graph.speed_limit:
+        Graph.graph_x = np.append(Graph.graph_x, [Graph.normal_speeds_quantity + 1])
+        Graph.graph_y = np.append(Graph.graph_y, [speed])
+        Graph.normal_speeds_quantity += 1
     return speed
 
 

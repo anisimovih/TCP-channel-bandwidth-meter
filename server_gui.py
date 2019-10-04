@@ -71,9 +71,9 @@ class Ui_server_window(object):
 
     def retranslateUi(self, server_window):
         _translate = QtCore.QCoreApplication.translate
-        server_window.setWindowTitle(_translate("server_window", "SpeedTest(server)"))
-        self.filename_label.setText(_translate("server_window", "Filename:"))
-        self.size_label.setText(_translate("server_window", "Size:"))
-        self.port_label.setText(_translate("server_window", "Port:"))
-        self.start_button.setText(_translate("server_window", "Start"))
-        self.change_to_client_button.setText(_translate("server_window", "Change to client"))
+        server_window.setWindowTitle(_translate("server_window", "Имитатор TCP соединения (сервер)"))
+        self.filename_label.setText(_translate("server_window", "Имя файла:"))
+        self.size_label.setText(_translate("server_window", "Размер сообщения:"))
+        self.port_label.setText(_translate("server_window", "Порт:"))
+        self.start_button.setText(_translate("server_window", "Старт"))
+        self.change_to_client_button.setText(_translate("server_window", "Переход к окну \"Клиент\""))

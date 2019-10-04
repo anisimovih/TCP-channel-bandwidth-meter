@@ -1,10 +1,9 @@
-import global_variables
+from PyQt5.QtCore import (QThread, pyqtSignal)
 
+import global_variables
 from client import connect_to_server
 from server import connect_to_client
-from PyQt5.QtCore import (QThread, pyqtSignal)
-#from interface_logic import WorkingWindow
-import interface_logic
+from graph import Graph
 
 
 # Подклассификация QThread
@@ -18,7 +17,7 @@ class AThread(QThread):
     def run(self):
         # Аргументы pyqtSignal определяют типы объектов, которые будут emit (испускаться) на этом сигнале
         self.threadSignalAThread.emit(1)  # значение в скобках пока не выяснил
-        global_variables.graph_active = True
+        Graph.graph_active = True
         print(global_variables.ip,
               int(global_variables.port),
               int(global_variables.size),

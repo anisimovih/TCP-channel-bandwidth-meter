@@ -1,6 +1,8 @@
 import time
+import random
 import csv
 import socket
+
 import global_variables
 
 
@@ -9,8 +11,11 @@ def connect_to_server(ip, port, size, filename):
         writer = csv.writer(csv_file, delimiter=';')
         writer.writerow(["start_time", "end_time", "delta", "number", "size", "speed"])
 
-        b = bytearray(int(size))
-        data = bytearray(int(size))
+        b = bytearray()
+        for i in range(0, size):
+            b.append(random.randint(0, 255))
+
+        b[0] = 0
 
         try:
             with socket.create_connection((ip, port)) as sock:
@@ -28,8 +33,9 @@ def connect_to_server(ip, port, size, filename):
                 while global_variables.thread_1_active:
                     b[0] += 1
 
-                    time.sleep(0.5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                    #time.sleep(0.5)  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+                    start_time = time.time()
                     sock.sendall(b)
                     #time.sleep(0.1)
                     end_time = time.time()
@@ -41,7 +47,7 @@ def connect_to_server(ip, port, size, filename):
                     speed = float(size) / (end_time - start_time)
                     number = b[0] + b[1] * 255 + b[2] * 65025
 
-                    graph_append_y(start_time, size, speed)  # Создание массива для нового графика.
+                    #graph_append_y(start_time, size, speed)  # Создание массива для нового графика.
 
 
                     """Вывод в консоль."""

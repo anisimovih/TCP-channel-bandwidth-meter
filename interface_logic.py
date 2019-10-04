@@ -1,18 +1,20 @@
-# TODO: поменять бесконечные циклы на зависимые от перемнных через поток
+# TODO: перенести взаимодействие с графиком в его класс
 import sys  # sys нужен для передачи argv в QApplication
 
-from graph import MyDynamicMplCanvas
-from catching_fall_errors import log_uncaught_exceptions
+from graph import Graph
+
+
+from PyQt5 import QtCore, QtWidgets
+# from PyQt5.Qt import (QMessageBox)
 
 import threads
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.Qt import (QMessageBox)
-
+import client
+import global_variables
+from catching_fall_errors import log_uncaught_exceptions
 import client_gui
 import server_gui
 import choise_gui
-import client
-import global_variables
+
 
 sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слотах, если приложение просто падает без стека
 
@@ -23,11 +25,29 @@ class WorkingWindow(QtWidgets.QMainWindow):
         # и т.д. в файле design.py
         super().__init__()
 
+        self.trans = QtCore.QTranslator(self)
+        # self.console.triggered.connect(self.change_language)
         self.thread = None
         self.graph = None
 
+    @QtCore.pyqtSlot(str)
+    def change_language(self, language):
+        # TODO: Добавить языки для сервера
+        if language == "eng":
+            self.trans.load('ru-eng')
+            QtWidgets.QApplication.instance().installTranslator(self.trans)
+        else:
+            QtWidgets.QApplication.instance().removeTranslator(self.trans)
+
+    def changeEvent(self, event):
+        """Переопределение метода для переключения языков."""
+        if event.type() == QtCore.QEvent.LanguageChange:
+            self.retranslateUi(self)
+        super(WorkingWindow, self).changeEvent(event)
+
     '''explanation to @QtCore.pyqtSlot:
        provide a C++ signature for method, thereby reduce the amount of memory used and is slightly faster'''
+
     @QtCore.pyqtSlot()
     def on_start_button_click(self):
         self.save_user_prefs()
@@ -73,7 +93,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
         if self.thread is None:
             self.thread = threads.AThread()
             self.thread.finished.connect(lambda: self.stop_thread())
-            #global_variables.clint_active = True
+            # global_variables.clint_active = True
             self.thread.start()
             # self.thread_2 = BThread()
             # self.thread.finished.connect(self.finished_a_thread)  # если поток может закончить выполнение
@@ -97,7 +117,10 @@ class WorkingWindow(QtWidgets.QMainWindow):
     def stop():
         global_variables.thread_1_active = False
         # Если это сервер, то делаем пустой коннект, чтобы выйти из ожидания.
-        if global_variables.what_to_join == 'c' and len(global_variables.graph_y) == 1:
+        # TODO: удалить global_variables.graph_y (graph_y = [0]  # Координата Y графика)
+        #  больше не существует, остановка не работает
+        #if global_variables.what_to_join == 'c' and len(global_variables.graph_y) == 1:
+        if global_variables.what_to_join == 'c':
             with open("user_prefs.txt", "r") as user_prefs:
                 text = user_prefs.read().splitlines()
                 client.connect_to_server("127.0.0.1", int(text[1]), int(text[2]), text[3])
@@ -116,14 +139,40 @@ class WorkingWindow(QtWidgets.QMainWindow):
             event.ignore()'''
 
     def add_graph(self):
-        self.graph = MyDynamicMplCanvas(self.graph_field, width=5, height=4, dpi=100)
+        self.graph = Graph(self.graph_field)
+        self.graph.mpl_connect("button_press_event", self.on_press)
+        self.graph.mpl_connect("button_release_event", self.on_release)
+        self.graph.mpl_connect("motion_notify_event", self.on_move)
+        self.graph.mpl_connect('scroll_event', self.on_scroll)
         self.gridLayout.addWidget(self.graph, 1, 0, 1, 5)
+
+    def on_press(self, event):
+        if event.button == 1:  # left
+            Graph.select_start(self.graph, event)
+        elif event.button == 3:
+            Graph.pull_start(self.graph, event)
+
+    def on_release(self, event):
+        if event.button == 1:  # left
+            Graph.select_stop(self.graph, event)
+        elif event.button == 3:
+            Graph.pull_stop(self.graph, event)
+
+    def on_move(self, event):
+        if event.button == 1:  # left
+            Graph.select_update(self.graph, event)
+        elif event.button == 3:
+            Graph.pull_update(self.graph, event)
+
+    def on_scroll(self, event):
+        Graph.zoom(self.graph, event, self.graph.axes)
 
 
 class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.setMouseTracking(True)
         self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
@@ -131,6 +180,9 @@ class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
             self.entered_port.setText(text[1])
             self.entered_size.setText(text[2])
             self.entered_filename.setText(text[3])
+
+        self.actionEndglish.triggered.connect(lambda: self.change_language('eng'))
+        self.action_5.triggered.connect(lambda: self.change_language('ru'))
 
 
 class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
@@ -162,8 +214,10 @@ class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):
         window_name.show()
 
     def buttons_connect(self):
-        self.client_window.change_to_server_button.clicked.connect(lambda: self.change_window(self.client_window, self.server_window, 'c'))
-        self.server_window.change_to_client_button.clicked.connect(lambda: self.change_window(self.server_window, self.client_window, 's'))
+        self.client_window.change_to_server_button.clicked.connect(
+            lambda: self.change_window(self.client_window, self.server_window, 'c'))
+        self.server_window.change_to_client_button.clicked.connect(
+            lambda: self.change_window(self.server_window, self.client_window, 's'))
 
     @staticmethod
     def change_window(from_window, to_window, window_abr):
