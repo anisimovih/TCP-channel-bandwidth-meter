@@ -1,8 +1,8 @@
 import socket
 import time
 import csv
-import global_variables
-from graph import Graph
+from src import global_variables
+from src.graph import Graph
 import numpy as np
 
 

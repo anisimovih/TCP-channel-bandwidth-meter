@@ -1,20 +1,14 @@
 # TODO: перенести взаимодействие с графиком в его класс
 import sys  # sys нужен для передачи argv в QApplication
 
-from graph import Graph
-
+from src.graph import Graph
 
 from PyQt5 import QtCore, QtWidgets
 # from PyQt5.Qt import (QMessageBox)
 
-import threads
-import client
-import global_variables
-from catching_fall_errors import log_uncaught_exceptions
-import client_gui
-import server_gui
-import choise_gui
-
+from src import threads, global_variables, client
+from src.catching_fall_errors import log_uncaught_exceptions
+from GUI import client_gui, choise_gui, server_gui
 
 sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слотах, если приложение просто падает без стека
 
@@ -34,7 +28,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
     def change_language(self, language):
         # TODO: Добавить языки для сервера
         if language == "eng":
-            self.trans.load('ru-eng')
+            self.trans.load('./translation/ru-eng')
             QtWidgets.QApplication.instance().installTranslator(self.trans)
         else:
             QtWidgets.QApplication.instance().removeTranslator(self.trans)

@@ -3,7 +3,7 @@ import random
 import csv
 import socket
 
-import global_variables
+from src import global_variables
 
 
 def connect_to_server(ip, port, size, filename):

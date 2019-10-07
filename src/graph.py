@@ -1,3 +1,4 @@
+# TODO: Вернулась лесенка, нужно подумать над интерполяцией
 from __future__ import unicode_literals
 import numpy as np
 
@@ -7,7 +8,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-import global_variables
+from src import global_variables
 
 
 class Graph(FigureCanvas):

@@ -1,9 +1,9 @@
 from PyQt5.QtCore import (QThread, pyqtSignal)
 
-import global_variables
-from client import connect_to_server
-from server import connect_to_client
-from graph import Graph
+from src import global_variables
+from src.client import connect_to_server
+from src.server import connect_to_client
+from src.graph import Graph
 
 
 # Подклассификация QThread
