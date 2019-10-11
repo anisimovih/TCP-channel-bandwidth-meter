@@ -1,12 +1,14 @@
 import socket
 import time
 import csv
-from src import global_variables
-from src.graph import Graph
+
 import numpy as np
 
+from src import global_variables
+from src.graph import Graph
 
-def connect_to_client(port, size, filename):
+
+def connect_to_client(port, size, filename, graph):
     with open(filename, "w", newline='') as csv_file:
         writer = csv.writer(csv_file, delimiter=';')
         writer.writerow(["start_time", "end_time", "delta", "number", "size", "speed"])
@@ -37,19 +39,19 @@ def connect_to_client(port, size, filename):
                             buf = buf[buf_len:]
                             save_size -= buf_len
                             if not global_variables.thread_1_active:  # Выход из бесконечного цикла при отключении клиента.
+                                global_variables.server_break = True
                                 break
                             # print('received ', 100/size*(size-save_size),'%')
                         end_time = time.time()
 
                         """Выход на ожидание новых данных при отсутствии передачи."""
-                        if not data:
+                        if not data or global_variables.server_break:
                             break
 
                         """Рассчет основных параметров."""
                         delta = format(end_time - start_time, '8f')
-                        size = size
                         number = data[0] + data[1] * 255 + data[2] * 65025
-                        #speed = graph_all_y(number, start_time, end_time, size)
+                        # speed = graph_all_y(number, start_time, end_time, size)
                         speed = smoothing_graph(number, start_time, end_time, size)
 
                         """Вывод в консоль."""
@@ -68,9 +70,14 @@ def connect_to_client(port, size, filename):
                         results = [start_time, end_time, delta, number, size, speed]
                         writer.writerow(results)  # Вывод в файл.
 
-        #sock.shutdown(socket.SHUT_RDWR)
+                        if number == size:
+                            Graph.draw_graph(graph)
+                            global_variables.thread_1_active = False
+                            global_variables.termination_reason = "Прием данных завершен."
+
         sock.close()
-        global_variables.termination_reason = "Прием данных остановлен"
+        if global_variables.termination_reason == '':
+            global_variables.termination_reason = "Прием данных прерван!"
 
 
 def smoothing_graph(number, start_time, end_time, size):
@@ -81,12 +88,7 @@ def smoothing_graph(number, start_time, end_time, size):
         speed = 20000'''
 
     if speed < Graph.speed_limit:
-        Graph.graph_x = np.append(Graph.graph_x, [Graph.normal_speeds_quantity + 1])
+        Graph.graph_x = np.append(Graph.graph_x, number)
         Graph.graph_y = np.append(Graph.graph_y, [speed])
         Graph.normal_speeds_quantity += 1
     return speed
-
-
-if __name__ == '__main__':
-    print("Started...")
-    connect_to_client(10002, 1000, "server.csv")

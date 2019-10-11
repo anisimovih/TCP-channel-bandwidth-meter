@@ -11,13 +11,13 @@ from src.graph import Graph
 class AThread(QThread):
     threadSignalAThread = pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, graph):
         super().__init__()
+        self.graph = graph
 
     def run(self):
         # Аргументы pyqtSignal определяют типы объектов, которые будут emit (испускаться) на этом сигнале
         self.threadSignalAThread.emit(1)  # значение в скобках пока не выяснил
-        Graph.graph_active = True
         print(global_variables.ip,
               int(global_variables.port),
               int(global_variables.size),
@@ -31,7 +31,8 @@ class AThread(QThread):
         else:
             connect_to_client(int(global_variables.port),
                               int(global_variables.size),
-                              global_variables.filename)
+                              global_variables.filename,
+                              self.graph)
             #print("End!")
 
         '''count = 1

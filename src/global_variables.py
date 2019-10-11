@@ -6,6 +6,7 @@ packet_limit = None
 
 # TODO: по возможности перенести в соответствующие классы
 thread_1_active = False  # Активность потока сервера/клиента.
+server_break = False
 what_to_join = 's'
 termination_reason = ''
 very_first_time = None  # Время приема самого первого пакета.

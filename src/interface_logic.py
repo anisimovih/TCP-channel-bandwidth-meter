@@ -1,11 +1,10 @@
 # TODO: перенести взаимодействие с графиком в его класс
 import sys  # sys нужен для передачи argv в QApplication
 
-from src.graph import Graph
-
 from PyQt5 import QtCore, QtWidgets
 # from PyQt5.Qt import (QMessageBox)
 
+from src.graph import Graph
 from src import threads, global_variables, client
 from src.catching_fall_errors import log_uncaught_exceptions
 from GUI import client_gui, choise_gui, server_gui
@@ -15,12 +14,9 @@ sys.excepthook = log_uncaught_exceptions  # Ловим ошибку в слот�
 
 class WorkingWindow(QtWidgets.QMainWindow):
     def __init__(self):
-        # Это здесь нужно для доступа к переменным, методам
-        # и т.д. в файле design.py
         super().__init__()
 
         self.trans = QtCore.QTranslator(self)
-        # self.console.triggered.connect(self.change_language)
         self.thread = None
         self.graph = None
 
@@ -41,7 +37,6 @@ class WorkingWindow(QtWidgets.QMainWindow):
 
     '''explanation to @QtCore.pyqtSlot:
        provide a C++ signature for method, thereby reduce the amount of memory used and is slightly faster'''
-
     @QtCore.pyqtSlot()
     def on_start_button_click(self):
         self.save_user_prefs()
@@ -50,6 +45,9 @@ class WorkingWindow(QtWidgets.QMainWindow):
 
             if self.checkBox_packetLimit.isChecked():
                 global_variables.packet_limit = int(self.entered_packetLimit.text())
+        else:
+            if self.checkBox_speed_lim.isChecked():
+                Graph.speed_limit = int(self.lineEdit_speed_lim.text())
 
         global_variables.port = self.entered_port.text()
         global_variables.filename = self.entered_filename.text()
@@ -65,13 +63,17 @@ class WorkingWindow(QtWidgets.QMainWindow):
                                        self.entered_port.text().rstrip() + '\n',
                                        self.entered_size.text().rstrip() + '\n',
                                        self.entered_filename.text().rstrip() + '\n',
-                                       text[4] + '\n'])
+                                       text[4] + '\n',
+                                       text[5] + '\n',
+                                       text[6] + '\n'])
             else:
                 user_prefs.writelines([text[0] + '\n',
                                        self.entered_port.text().rstrip() + '\n',
                                        self.entered_size.text().rstrip() + '\n',
                                        text[3] + '\n',
-                                       self.entered_filename.text().rstrip()])
+                                       self.entered_filename.text().rstrip() + '\n',
+                                       "True\n" if self.checkBox_speed_lim.isChecked() else "False\n",
+                                       self.lineEdit_speed_lim.text().rstrip() + '\n'])
 
     '''ИСПРАВИТЬ: выводит результаты только после окончания передачи'''
     '''def printing_to_console(self):
@@ -82,10 +84,9 @@ class WorkingWindow(QtWidgets.QMainWindow):
                     self.console.append("Пакет №" + line["number"] + " отправлен со средней скоростью " + str(
                         round(float(line["speed"]))) + " Б/с")'''
 
-    # ---- AThread(QThread) -----------#
     def using_a_thread(self):
         if self.thread is None:
-            self.thread = threads.AThread()
+            self.thread = threads.AThread(self.graph)
             self.thread.finished.connect(lambda: self.stop_thread())
             # global_variables.clint_active = True
             self.thread.start()
@@ -98,26 +99,29 @@ class WorkingWindow(QtWidgets.QMainWindow):
         else:
             self.stop()
 
-    def stop_thread(self):
+    def stop_thread(self, additional_reason=None):
+        print("поток остановлен")
         global_variables.thread_1_active = False
         self.thread = None
         '''self.thread_2.terminate()
         self.thread_2 = None'''
         self.start_button.setStyleSheet("background-color: rgb(78, 154, 6)")
         self.start_button.setText("Start")
-        self.console.append(global_variables.termination_reason)
+        if additional_reason is not None:
+            self.console.append(additional_reason)
+        else:
+            self.console.append(global_variables.termination_reason)
+            global_variables.termination_reason = ''
 
-    @staticmethod
-    def stop():
+    def stop(self):
         global_variables.thread_1_active = False
         # Если это сервер, то делаем пустой коннект, чтобы выйти из ожидания.
-        # TODO: удалить global_variables.graph_y (graph_y = [0]  # Координата Y графика)
-        #  больше не существует, остановка не работает
-        #if global_variables.what_to_join == 'c' and len(global_variables.graph_y) == 1:
-        if global_variables.what_to_join == 'c':
+        if global_variables.what_to_join == 'c' and Graph.normal_speeds_quantity == 0:
             with open("user_prefs.txt", "r") as user_prefs:
                 text = user_prefs.read().splitlines()
                 client.connect_to_server("127.0.0.1", int(text[1]), int(text[2]), text[3])
+        elif global_variables.what_to_join == 's':
+            self.stop_thread("Фаервол не дает подключиться")
 
     '''def closeEvent(self, event):
         reply = QMessageBox.question \
@@ -177,6 +181,7 @@ class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
 
         self.actionEndglish.triggered.connect(lambda: self.change_language('eng'))
         self.action_5.triggered.connect(lambda: self.change_language('ru'))
+        self.action_remove_graph.triggered.connect(lambda: Graph.clear_graph(self.graph))
 
 
 class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
@@ -189,6 +194,10 @@ class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
             self.entered_port.setText(text[1])
             self.entered_size.setText(text[2])
             self.entered_filename.setText(text[4])
+            if text[5] == "True":
+                self.checkBox_speed_lim.setChecked(True)
+            self.lineEdit_speed_lim.setText(text[6])
+        self.action_remove_graph.triggered.connect(lambda: Graph.clear_graph(self.graph))
 
 
 class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):
@@ -229,3 +238,5 @@ if __name__ == '__main__':
     window = CrossWindow()
     window.show()
     app.exec_()
+
+    a = WorkingWindow()

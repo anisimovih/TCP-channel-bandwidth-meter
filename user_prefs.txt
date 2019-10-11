@@ -1,5 +1,7 @@
-10.0.74.152
-10011
+127.0.0.1
+10039
 100
-client.csv
-server.csv
+./logging/client.csv
+./logging/server.csv
+False
+100000

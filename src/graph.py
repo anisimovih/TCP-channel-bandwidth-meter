@@ -1,4 +1,3 @@
-# TODO: Вернулась лесенка, нужно подумать над интерполяцией
 from __future__ import unicode_literals
 import numpy as np
 
@@ -12,13 +11,13 @@ from src import global_variables
 
 
 class Graph(FigureCanvas):
-
     normal_speeds_quantity = 0  # Общее количество нормальных значений
     normal_speeds_number = 0  # Количество уже отображенных значений
-    speed_limit = 10000  # Ограничение скорости для отсечения аномальных значений
+    speed_limit = float("inf")  # Ограничение скорости для отсечения аномальных значений
     graph_x = np.array([0])
     graph_y = np.array([0])
-    graph_active = False  # Активность графика.
+    #graph_x = np.array([1, 10, 20, 30, 40])
+    #graph_y = np.array([100, 400, 300, 500, 100])
 
     def __init__(self, *args, **kwargs):
         self.fig = plt.figure(figsize=(4, 5))
@@ -39,50 +38,38 @@ class Graph(FigureCanvas):
         self.limit_y_max = 100
 
         self.line = None  # График скорости
-        #self.draw_start_point()
+
         self.start_setup()
         timer = QtCore.QTimer(self)
-        #timer.timeout.connect(self.draw_graph)
+        #timer.timeout.connect(self.test)
         timer.timeout.connect(self.draw_graph)
         timer.start(3000)
 
-    '''def draw_start_point(self):
-        self.axes.grid(axis='both')
+    def start_setup(self):
+        self.draw_start_point()
+        self.setup_axe_limits()
+        self.setup_colours()
+        self.draw()
+
+    def draw_start_point(self):
         self.line = self.axes.plot([0], [0], 'ro')
+        self.axes.grid(b=True, axis='both')
         self.axes.set_xlabel("Номер сообщения")
         self.axes.set_ylabel("Скорость (бит/сек)")
+
+    def setup_axe_limits(self):
         self.axes.set_xlim(xmin=0, xmax=10)
         self.axes.set_ylim(ymin=0, ymax=10)
         self.axes.set_xlim(auto=True)
         self.axes.set_ylim(auto=True)
-        self.axes.set_facecolor('xkcd:black')
-        self.draw()'''
+        self.fig.subplots_adjust(bottom=0.15, top=0.95, left=0.1, right=0.95)
 
-    def start_setup(self):
-        def draw_start_point():
-            self.line = self.axes.plot([0], [0], 'ro')
-            self.axes.grid(axis='both')
-            self.axes.set_xlabel("Номер сообщения")
-            self.axes.set_ylabel("Скорость (бит/сек)")
-
-        def setup_axe_limits():
-            self.axes.set_xlim(xmin=0, xmax=10)
-            self.axes.set_ylim(ymin=0, ymax=10)
-            self.axes.set_xlim(auto=True)
-            self.axes.set_ylim(auto=True)
-            self.fig.subplots_adjust(bottom=0.15, top=0.95, left=0.1, right=0.95)
-
-        def setup_colours():
-            #self.axes.set_facecolor('xkcd:black')
-            pass
-
-        draw_start_point()
-        setup_axe_limits()
-        setup_colours()
-        self.draw()
+    def setup_colours(self):
+        #self.axes.set_facecolor('xkcd:black')
+        pass
 
     def draw_graph(self):
-        if Graph.graph_active:
+        if global_variables.thread_1_active:
             if Graph.normal_speeds_number < Graph.normal_speeds_quantity:
                 self.line.pop(0).remove()
                 bi = PchipInterpolator(Graph.graph_x, Graph.graph_y)
@@ -92,9 +79,18 @@ class Graph(FigureCanvas):
                 self.draw()
                 Graph.normal_speeds_number += 1
 
+    def clear_graph(self):
+        Graph.normal_speeds_quantity = 0  # Общее количество нормальных значений
+        Graph.normal_speeds_number = 0
+        Graph.graph_x = np.array([0])
+        Graph.graph_y = np.array([0])
+        global_variables.very_first_time = None
+        self.line.pop(0).remove()
+        self.start_setup()
+
     # TODO: удалить
     def test(self):
-        if Graph.graph_active:
+        if global_variables.thread_1_active:
             self.line.pop(0).remove()
             global_variables.graph_smooth_x.append(4 + len(global_variables.graph_smooth_x))
             global_variables.graph_smooth_y.append(len(global_variables.graph_smooth_x))
@@ -105,6 +101,7 @@ class Graph(FigureCanvas):
             self.limit_x_max = max(global_variables.graph_smooth_x)
             self.limit_y_max = max(global_variables.graph_smooth_y)
 
+    # <editor-fold desc="Zooming">
     @staticmethod
     def rectangle(x, y, width, height):
         return patches.Rectangle((x, y), width, height, linewidth=2, edgecolor='r', facecolor='blue', alpha=.25)
@@ -118,6 +115,12 @@ class Graph(FigureCanvas):
         if self.selecting:
             self.selecting = False
             self.select_rect.remove()
+            '''Инвертируем значения, при выделении в нестандартном направлении.'''
+            if event.xdata < self.start_x:
+                event.xdata, self.start_x = self.start_x, event.xdata
+            if event.ydata < self.start_y:
+                event.ydata, self.start_y = self.start_y, event.ydata
+
             if event.xdata - self.start_x < 1 or event.ydata - self.start_y < 1:
                 print("Приближение ближе", 1, "запрещено! (X =", event.xdata - self.start_x, "; Y =", event.ydata - self.start_y, ")")
             else:
@@ -197,3 +200,4 @@ class Graph(FigureCanvas):
         self.axes.set_xlim(self.cur_xlim)
         self.axes.set_ylim(self.cur_ylim)
         self.draw()
+    # </editor-fold>
