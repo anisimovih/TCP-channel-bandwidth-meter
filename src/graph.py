@@ -16,8 +16,8 @@ class Graph(FigureCanvas):
     speed_limit = float("inf")  # Ограничение скорости для отсечения аномальных значений
     graph_x = np.array([0])
     graph_y = np.array([0])
-    #graph_x = np.array([1, 10, 20, 30, 40])
-    #graph_y = np.array([100, 400, 300, 500, 100])
+    # graph_x = np.array([0, 2, 15, 28, 42, 55, 69, 82, 96])
+    # graph_y = np.array([0, 20, 150, 180, 228, 261, 295, 304, 323])
 
     def __init__(self, *args, **kwargs):
         self.fig = plt.figure(figsize=(4, 5))
@@ -28,8 +28,8 @@ class Graph(FigureCanvas):
         self.selecting = False
         self.start_x = None
         self.start_y = None
-        self.select_width = None  # Ширина последнего выделения, если курсор пересечет границу
-        self.select_height = None  # Высота последнего выделения, если курсор пересечет границу
+        self.select_width = None
+        self.select_height = None
         self.select_rect = self.axes.add_patch(self.rectangle(0, 0, 0, 0))
         self.cur_xlim = None
         self.cur_ylim = None
@@ -77,7 +77,7 @@ class Graph(FigureCanvas):
                 y_smooth = bi(x_smooth)
                 self.line = self.axes.plot(x_smooth, y_smooth, 'r')
                 self.draw()
-                Graph.normal_speeds_number += 1
+                Graph.normal_speeds_number = Graph.normal_speeds_quantity
 
     def clear_graph(self):
         Graph.normal_speeds_quantity = 0  # Общее количество нормальных значений
@@ -136,14 +136,12 @@ class Graph(FigureCanvas):
                 self.select_width = event.xdata - self.start_x
                 self.select_height = event.ydata - self.start_y
                 self.select_rect = self.axes.add_patch(
-                    Graph.rectangle(self.start_x, self.start_y, self.select_width,
-                                    event.ydata - self.start_y))
+                    Graph.rectangle(self.start_x, self.start_y, self.select_width, event.ydata - self.start_y))
                 self.draw()
             else:
+                self.selecting = False
                 self.select_rect.remove()
-                self.select_rect = self.axes.add_patch(
-                    Graph.rectangle(self.start_x, self.start_y, self.select_width,
-                                    self.select_height))
+                self.select_rect = self.axes.add_patch(Graph.rectangle(0, 0, 0, 0))
                 self.draw()
 
     def zoom(self, event, ax, base_scale=2.):

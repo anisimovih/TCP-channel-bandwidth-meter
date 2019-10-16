@@ -84,11 +84,12 @@ def smoothing_graph(number, start_time, end_time, size):
     total_delta = end_time - global_variables.very_first_time
     total_amount = number * size
     speed = total_amount / total_delta * 8
+    instant_speed = size / (end_time - start_time)
     '''if number % 10 == 0:
         speed = 20000'''
 
-    if speed < Graph.speed_limit:
+    if instant_speed < Graph.speed_limit:
         Graph.graph_x = np.append(Graph.graph_x, number)
-        Graph.graph_y = np.append(Graph.graph_y, [speed])
+        Graph.graph_y = np.append(Graph.graph_y, speed)
         Graph.normal_speeds_quantity += 1
     return speed

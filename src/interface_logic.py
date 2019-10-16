@@ -55,25 +55,39 @@ class WorkingWindow(QtWidgets.QMainWindow):
         self.using_a_thread()
 
     def save_user_prefs(self):
+        """
+        Структура user_prefs:
+        ip, port, size, client.csv path, server.csv path,
+        активация отсечения аномалий, значение отсечения аномалий,
+        активация ограничения пакетов, значение ограничения пакетов
+        """
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
         with open("user_prefs.txt", "w") as user_prefs:
             if global_variables.what_to_join == 's':
+                # Клиент:
                 user_prefs.writelines([self.entered_ip.text().rstrip() + '\n',
                                        self.entered_port.text().rstrip() + '\n',
                                        self.entered_size.text().rstrip() + '\n',
                                        self.entered_filename.text().rstrip() + '\n',
                                        text[4] + '\n',
                                        text[5] + '\n',
-                                       text[6] + '\n'])
+                                       text[6] + '\n',
+                                       "True\n" if self.checkBox_packetLimit.isChecked() else "False\n",
+                                       self.entered_packetLimit.text().rstrip() + '\n',
+                                       ])
             else:
+                # Сервер:
                 user_prefs.writelines([text[0] + '\n',
                                        self.entered_port.text().rstrip() + '\n',
                                        self.entered_size.text().rstrip() + '\n',
                                        text[3] + '\n',
                                        self.entered_filename.text().rstrip() + '\n',
                                        "True\n" if self.checkBox_speed_lim.isChecked() else "False\n",
-                                       self.lineEdit_speed_lim.text().rstrip() + '\n'])
+                                       self.lineEdit_speed_lim.text().rstrip() + '\n',
+                                       text[7] + '\n',
+                                       text[8] + '\n'
+                                       ])
 
     '''ИСПРАВИТЬ: выводит результаты только после окончания передачи'''
     '''def printing_to_console(self):
@@ -178,6 +192,9 @@ class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
             self.entered_port.setText(text[1])
             self.entered_size.setText(text[2])
             self.entered_filename.setText(text[3])
+            if text[7] == "True":
+                self.checkBox_packetLimit.setChecked(True)
+            self.entered_packetLimit.setText(text[8])
 
         self.actionEndglish.triggered.connect(lambda: self.change_language('eng'))
         self.action_5.triggered.connect(lambda: self.change_language('ru'))
