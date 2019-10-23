@@ -13,53 +13,66 @@ def connect_to_server(ip, port, size, filename):
 
         b = bytearray(size)
 
-        try:
-            with socket.create_connection((ip, port)) as sock:
-                while global_variables.thread_1_active:
-                    for i in range(3, size):
-                        b[i] = random.randint(0, 255)
+        # tcp_connection(ip, port, size, b)
+        udp_connection(ip, port, size, b)
 
-                    """номер пакета"""
-                    b[0] += 1
-                    if b[0] == 255:
-                        b[1] += 1
-                        b[0] = 0
-                        if b[1] == 255:
-                            b[2] += 1
-                            b[1] = 0
 
-                    sock.sendall(b)
+def tcp_connection(ip, port, size, b):
+    try:
+        with socket.create_connection((ip, port)) as sock:
+            while global_variables.thread_1_active:
+                for i in range(3, size):
+                    b[i] = random.randint(0, 255)
 
-                    check_packet_limit()  # Проверка на ограничение по пакетам.
+                increment_packet_number(b)
 
-                    '''start_time = time.time()
-                    sock.sendall(b)
-                    end_time = time.time()
+                sock.sendall(b)
 
-                    check_packet_limit()  # Проверка на ограничение по пакетам.
+                check_packet_limit()  # Проверка на ограничение по пакетам.
 
-                    """рассчет основных параметров"""
-                    delta = format(end_time - start_time, '8f')
-                    speed = float(size) / (end_time - start_time)
-                    number = b[0] + b[1] * 255 + b[2] * 65025
+    except ConnectionRefusedError:
+        print("wrong port")
+        global_variables.termination_reason = "Подключение не удалось!"
+        global_variables.thread_1_active = False
 
-                    """Вывод в консоль."""
-                    print('start_time = {st}, end_time = {end}, delta = {dell}, '
-                          'number = {num}, size = {sz}, speed = {sp}'.
-                          format(st=start_time, end=end_time, dell=delta, num=number, sz=size, sp=speed))
-                    results = [start_time, end_time, delta, number, size, speed]
 
-                    """Вывод в файл."""
-                    writer.writerow(results)'''
+def udp_connection(ip, port, size, b):
+    udp_speed_limit = 1200 / 8
+    time_limit = time.time()
+    try:
+        with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as sock:
+            while global_variables.thread_1_active:
+                for i in range(3, size):
+                    b[i] = random.randint(0, 255)
 
-                '''except socket.timeout:
-                    print("send data timeout")
-                except socket.error as ex:
-                    print("send data error:", ex)'''
-        except ConnectionRefusedError:
-            print("wrong port")
-            global_variables.termination_reason = "Подключение не удалось!"
-            global_variables.thread_1_active = False
+                number = increment_packet_number(b)
+
+                '''Ограничение скорости передачи'''
+                udp_time = time.time() - time_limit
+                while (size / udp_time) > udp_speed_limit:
+                    time.sleep(0.001)
+                    udp_time = time.time() - time_limit
+
+                sock.sendto(b, (ip, port))
+                time_limit = time.time()
+                print("Отправил ", number, " пакет.")
+                check_packet_limit()  # Проверка на ограничение по пакетам.
+
+    except ConnectionRefusedError:
+        print("wrong port")
+        global_variables.termination_reason = "Подключение не удалось!"
+        global_variables.thread_1_active = False
+
+
+def increment_packet_number(b):
+    b[0] += 1
+    if b[0] == 255:
+        b[1] += 1
+        b[0] = 0
+        if b[1] == 255:
+            b[2] += 1
+            b[1] = 0
+    return b[0] + b[1] * 255 + b[2] * 65025
 
 
 def check_packet_limit():

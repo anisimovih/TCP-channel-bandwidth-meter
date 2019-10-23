@@ -1,4 +1,5 @@
 # TODO: перенести взаимодействие с графиком в его класс
+# 10.0.74.152
 import sys  # sys нужен для передачи argv в QApplication
 
 from PyQt5 import QtCore, QtWidgets

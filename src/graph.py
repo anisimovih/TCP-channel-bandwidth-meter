@@ -38,6 +38,7 @@ class Graph(FigureCanvas):
         self.limit_y_max = 100
 
         self.line = None  # График скорости
+        self.points = None
 
         self.start_setup()
         timer = QtCore.QTimer(self)
@@ -53,6 +54,7 @@ class Graph(FigureCanvas):
 
     def draw_start_point(self):
         self.line = self.axes.plot([0], [0], 'ro')
+        self.points = self.axes.plot([0], [0], 'ro')
         self.axes.grid(b=True, axis='both')
         self.axes.set_xlabel("Номер сообщения")
         self.axes.set_ylabel("Скорость (бит/сек)")
@@ -77,7 +79,13 @@ class Graph(FigureCanvas):
                 y_smooth = bi(x_smooth)
                 self.line = self.axes.plot(x_smooth, y_smooth, 'r')
                 self.draw()
+                # self.draw_points()
                 Graph.normal_speeds_number = Graph.normal_speeds_quantity
+
+    def draw_points(self):
+        self.points.pop(0).remove()
+        self.points = self.axes.plot(Graph.graph_x.tolist(), Graph.graph_y.tolist(), 'bo')
+        self.draw()
 
     def clear_graph(self):
         Graph.normal_speeds_quantity = 0  # Общее количество нормальных значений
