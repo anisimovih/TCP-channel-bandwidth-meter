@@ -12,9 +12,10 @@ def connect_to_server(ip, port, size, filename):
         writer.writerow(["start_time", "end_time", "delta", "number", "size", "speed"])
 
         b = bytearray(size)
-
-        # tcp_connection(ip, port, size, b)
-        udp_connection(ip, port, size, b)
+        if global_variables.connection_type == "TCP":
+            tcp_connection(ip, port, size, b)
+        else:
+            udp_connection(ip, port, size, b)
 
 
 def tcp_connection(ip, port, size, b):
@@ -37,7 +38,6 @@ def tcp_connection(ip, port, size, b):
 
 
 def udp_connection(ip, port, size, b):
-    udp_speed_limit = 1200 / 8
     time_limit = time.time()
     try:
         with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as sock:
@@ -49,7 +49,7 @@ def udp_connection(ip, port, size, b):
 
                 '''Ограничение скорости передачи'''
                 udp_time = time.time() - time_limit
-                while (size / udp_time) > udp_speed_limit:
+                while (size / udp_time) > global_variables.udp_speed:
                     time.sleep(0.001)
                     udp_time = time.time() - time_limit
 

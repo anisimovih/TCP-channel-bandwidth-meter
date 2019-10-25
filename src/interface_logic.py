@@ -21,20 +21,41 @@ class WorkingWindow(QtWidgets.QMainWindow):
         self.thread = None
         self.graph = None
 
+    # <editor-fold desc="Actions">
     @QtCore.pyqtSlot(str)
     def change_language(self, language):
         # TODO: Добавить языки для сервера
         if language == "eng":
             self.trans.load('./translation/ru-eng')
             QtWidgets.QApplication.instance().installTranslator(self.trans)
+            self.action_english.setEnabled(False)
+            self.action_russian.setEnabled(True)
         else:
             QtWidgets.QApplication.instance().removeTranslator(self.trans)
+            self.action_english.setEnabled(True)
+            self.action_russian.setEnabled(False)
 
     def changeEvent(self, event):
         """Переопределение метода для переключения языков."""
         if event.type() == QtCore.QEvent.LanguageChange:
             self.retranslateUi(self)
         super(WorkingWindow, self).changeEvent(event)
+
+    def change_connection_type(self, new_connection_type):
+        self.console.append("Тип соединения переключен на " + new_connection_type)
+        if new_connection_type == 'TCP':
+            global_variables.connection_type = 'TCP'
+            self.action_TCP.setEnabled(False)
+            if self.window == 'Server':
+                self.action_UDP_.setEnabled(True)
+        else:
+            global_variables.connection_type = 'UDP'
+            self.action_TCP.setEnabled(True)
+            if self.window == 'Server':
+                self.action_UDP_.setEnabled(False)
+            else:
+                self.console.append("со скоростью " + str(global_variables.udp_speed) + " Байт/сек.")
+
 
     '''explanation to @QtCore.pyqtSlot:
        provide a C++ signature for method, thereby reduce the amount of memory used and is slightly faster'''
@@ -54,6 +75,8 @@ class WorkingWindow(QtWidgets.QMainWindow):
         global_variables.filename = self.entered_filename.text()
         global_variables.size = self.entered_size.text()
         self.using_a_thread()
+
+    # </editor-fold>
 
     def save_user_prefs(self):
         """
@@ -90,15 +113,10 @@ class WorkingWindow(QtWidgets.QMainWindow):
                                        text[8] + '\n'
                                        ])
 
-    '''ИСПРАВИТЬ: выводит результаты только после окончания передачи'''
-    '''def printing_to_console(self):
-        if os.path.exists("client.csv"):
-            with open("client.csv", "r") as f_obj:
-                reader = csv.DictReader(f_obj, delimiter=';')
-                for line in reader:
-                    self.console.append("Пакет №" + line["number"] + " отправлен со средней скоростью " + str(
-                        round(float(line["speed"]))) + " Б/с")'''
+    def printing_to_console(self, text):
+        self.console.append(text)
 
+    # <editor-fold desc="Threads">
     def using_a_thread(self):
         if self.thread is None:
             self.thread = threads.AThread(self.graph)
@@ -138,6 +156,8 @@ class WorkingWindow(QtWidgets.QMainWindow):
         elif global_variables.what_to_join == 's':
             self.stop_thread("Фаервол не дает подключиться")
 
+    # </editor-fold>
+
     '''def closeEvent(self, event):
         reply = QMessageBox.question \
             (self, 'Информация',
@@ -151,6 +171,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
         else:
             event.ignore()'''
 
+    # <editor-fold desc="Graph">
     def add_graph(self):
         self.graph = Graph(self.graph_field)
         self.graph.mpl_connect("button_press_event", self.on_press)
@@ -180,11 +201,15 @@ class WorkingWindow(QtWidgets.QMainWindow):
     def on_scroll(self, event):
         Graph.zoom(self.graph, event, self.graph.axes)
 
+    # </editor-fold>
+
 
 class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.window = 'Client'
+        self.ql = QtWidgets.QLineEdit("1200")
         self.setMouseTracking(True)
         self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
@@ -197,15 +222,40 @@ class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
                 self.checkBox_packetLimit.setChecked(True)
             self.entered_packetLimit.setText(text[8])
 
-        self.actionEndglish.triggered.connect(lambda: self.change_language('eng'))
-        self.action_5.triggered.connect(lambda: self.change_language('ru'))
+        self.action_english.triggered.connect(lambda: self.change_language('eng'))
+        self.action_russian.triggered.connect(lambda: self.change_language('ru'))
         self.action_remove_graph.triggered.connect(lambda: Graph.clear_graph(self.graph))
+        self.action_TCP.triggered.connect(lambda: self.change_connection_type('TCP'))
+
+        self.menu_add_udp_limit()
+
+    def menu_add_udp_limit(self):
+        self.ql = QtWidgets.QLineEdit("1200")
+        self.ql.setMinimumWidth(100)
+        self.ql.textChanged.connect(self.on_udp_text_changed)
+        self.ql.returnPressed.connect(lambda: self.change_connection_type('UDP'))  # нажатие на Enter
+        udp_max_speed = QtWidgets.QWidgetAction(self)
+        udp_max_speed.setDefaultWidget(self.ql)
+        self.menu_UDP.addAction(udp_max_speed)
+
+    @QtCore.pyqtSlot(str)
+    def on_udp_text_changed(self, text):
+        if text != "":
+            try:
+                global_variables.udp_speed = int(text)
+            except ValueError:
+                self.ql.setText("1200")
+                global_variables.udp_speed = 1200
+                self.console.append("Введено неверное значение!")
+        else:
+            global_variables.udp_speed = 0
 
 
 class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.window = 'Server'
         self.start_button.clicked.connect(lambda: self.on_start_button_click())
         with open("user_prefs.txt", "r") as user_prefs:
             text = user_prefs.read().splitlines()
@@ -216,6 +266,8 @@ class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
                 self.checkBox_speed_lim.setChecked(True)
             self.lineEdit_speed_lim.setText(text[6])
         self.action_remove_graph.triggered.connect(lambda: Graph.clear_graph(self.graph))
+        self.action_TCP.triggered.connect(lambda: self.change_connection_type('TCP'))
+        self.action_UDP_.triggered.connect(lambda: self.change_connection_type('UDP'))
 
 
 class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):

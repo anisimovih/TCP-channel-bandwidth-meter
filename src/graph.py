@@ -16,8 +16,8 @@ class Graph(FigureCanvas):
     speed_limit = float("inf")  # Ограничение скорости для отсечения аномальных значений
     graph_x = np.array([0])
     graph_y = np.array([0])
-    # graph_x = np.array([0, 2, 15, 28, 42, 55, 69, 82, 96])
-    # graph_y = np.array([0, 20, 150, 180, 228, 261, 295, 304, 323])
+    # graph_x = np.array([0, 10, 20, 40, 80, 160, 320, 640])
+    # graph_y = np.array([0, 50, 150, 200, 200, 150, 300, 350])
 
     def __init__(self, *args, **kwargs):
         self.fig = plt.figure(figsize=(4, 5))

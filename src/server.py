@@ -13,8 +13,10 @@ def connect_to_client(port, size, filename, graph):
         writer = csv.writer(csv_file, delimiter=';')
         writer.writerow(["start_time", "end_time", "delta", "number", "size", "speed"])
 
-        # tcp_reception(port, size, writer)
-        udp_reception(port, size, writer)
+        if global_variables.connection_type == "TCP":
+            tcp_reception(port, size, writer)
+        else:
+            udp_reception(port, size, writer)
 
 
 def tcp_reception(port, size, writer):

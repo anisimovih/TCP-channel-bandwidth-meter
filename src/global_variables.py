@@ -3,6 +3,8 @@ port = ''
 filename = ''
 size = ''
 packet_limit = None
+connection_type = 'TCP'
+udp_speed = 1200
 
 # TODO: по возможности перенести в соответствующие классы
 thread_1_active = False  # Активность потока сервера/клиента.
