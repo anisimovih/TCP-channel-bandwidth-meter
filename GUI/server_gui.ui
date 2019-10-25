@@ -136,8 +136,16 @@
      <addaction name="separator"/>
      <addaction name="action_UDP_"/>
     </widget>
+    <widget class="QMenu" name="menu_lost_packets">
+     <property name="title">
+      <string>Отображение полученных пакетов</string>
+     </property>
+     <addaction name="action_lost_packets_on"/>
+     <addaction name="action_lost_packets_off"/>
+    </widget>
     <addaction name="action_remove_graph"/>
     <addaction name="menu_connection_type"/>
+    <addaction name="menu_lost_packets"/>
    </widget>
    <addaction name="menu"/>
   </widget>
@@ -168,6 +176,19 @@
   <action name="action_UDP_">
    <property name="text">
     <string>UDP</string>
+   </property>
+  </action>
+  <action name="action_lost_packets_on">
+   <property name="text">
+    <string>Включить</string>
+   </property>
+  </action>
+  <action name="action_lost_packets_off">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Выключить</string>
    </property>
   </action>
  </widget>

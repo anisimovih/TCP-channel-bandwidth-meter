@@ -54,7 +54,9 @@ class WorkingWindow(QtWidgets.QMainWindow):
             if self.window == 'Server':
                 self.action_UDP_.setEnabled(False)
             else:
-                self.console.append("со скоростью " + str(global_variables.udp_speed) + " Байт/сек.")
+                global_variables.udp_speed = int(self.ql.text()) / 8
+                print(global_variables.udp_speed)
+                self.console.append("со скоростью " + self.ql.text() + " бит/сек.")
 
 
     '''explanation to @QtCore.pyqtSlot:
@@ -242,7 +244,7 @@ class ClientWindow(WorkingWindow, client_gui.Ui_client_window):
     def on_udp_text_changed(self, text):
         if text != "":
             try:
-                global_variables.udp_speed = int(text)
+                global_variables.udp_speed = int(text) / 8
             except ValueError:
                 self.ql.setText("1200")
                 global_variables.udp_speed = 1200
@@ -265,9 +267,31 @@ class ServerWindow(WorkingWindow, server_gui.Ui_server_window):
             if text[5] == "True":
                 self.checkBox_speed_lim.setChecked(True)
             self.lineEdit_speed_lim.setText(text[6])
+        self.connect_triggers()
+
+    def connect_triggers(self):
         self.action_remove_graph.triggered.connect(lambda: Graph.clear_graph(self.graph))
         self.action_TCP.triggered.connect(lambda: self.change_connection_type('TCP'))
         self.action_UDP_.triggered.connect(lambda: self.change_connection_type('UDP'))
+        self.action_lost_packets_off.triggered.connect(lambda: self.change_lost_packages_mapping(False))
+        self.action_lost_packets_on.triggered.connect(lambda: self.change_lost_packages_mapping(True))
+
+    def show_lost_packages(self):
+        pass
+
+    def change_lost_packages_mapping(self, trigger):
+        if trigger:
+            self.action_lost_packets_off.setEnabled(True)
+            self.action_lost_packets_on.setEnabled(False)
+            self.graph.points_trigger = True
+            self.console.append("Включено отображение полученных пакетов.")
+        else:
+            self.action_lost_packets_off.setEnabled(False)
+            self.action_lost_packets_on.setEnabled(True)
+            self.graph.points_trigger = False
+            self.console.append("Отображение полученных пакетов отключено.")
+        Graph.draw_points(self.graph)
+        self.graph.draw()
 
 
 class CrossWindow(QtWidgets.QMainWindow, choise_gui.Ui_MainWindow):

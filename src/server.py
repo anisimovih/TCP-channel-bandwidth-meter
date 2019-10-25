@@ -147,11 +147,7 @@ def udp_smoothing_graph(number, real_number, start_time, end_time, size):
     total_amount = real_number * size
     speed = total_amount / total_delta * 8
     instant_speed = size / (end_time - start_time) * 8
-    print("Пакет ", number, " средняя скорость: ", speed, "единичная скорость:", instant_speed, " (бит/сек)")
-    print("speed = ", speed)
-    print("instant_speed = ", instant_speed)
-    '''if number % 10 == 0:
-        speed = 20000'''
+    # print("Пакет ", number, " средняя скорость: ", speed, "единичная скорость:", instant_speed, " (бит/сек)")
 
     if instant_speed < Graph.speed_limit:
         Graph.graph_x = np.append(Graph.graph_x, number)

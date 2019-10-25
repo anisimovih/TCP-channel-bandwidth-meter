@@ -39,12 +39,13 @@ class Graph(FigureCanvas):
 
         self.line = None  # График скорости
         self.points = None
+        self.points_trigger = False
 
         self.start_setup()
         timer = QtCore.QTimer(self)
         #timer.timeout.connect(self.test)
         timer.timeout.connect(self.draw_graph)
-        timer.start(3000)
+        timer.start(500)
 
     def start_setup(self):
         self.draw_start_point()
@@ -78,14 +79,16 @@ class Graph(FigureCanvas):
                 x_smooth = np.linspace(min(Graph.graph_x), max(Graph.graph_x), len(Graph.graph_y) * 10)
                 y_smooth = bi(x_smooth)
                 self.line = self.axes.plot(x_smooth, y_smooth, 'r')
-                self.draw()
-                # self.draw_points()
+                self.draw_points()
                 Graph.normal_speeds_number = Graph.normal_speeds_quantity
+                self.draw()
 
     def draw_points(self):
         self.points.pop(0).remove()
-        self.points = self.axes.plot(Graph.graph_x.tolist(), Graph.graph_y.tolist(), 'bo')
-        self.draw()
+        if self.points_trigger:
+            self.points = self.axes.plot(Graph.graph_x.tolist(), Graph.graph_y.tolist(), 'bo')
+        else:
+            self.points = self.axes.plot([], [], 'ro')
 
     def clear_graph(self):
         Graph.normal_speeds_quantity = 0  # Общее количество нормальных значений
