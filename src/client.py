@@ -53,7 +53,7 @@ def udp_connection(ip, port, size, b):
                     time.sleep(0.001)
                     udp_time = time.time() - time_limit
 
-                print(size / udp_time, " > ", global_variables.udp_speed)
+                #print(size / udp_time, " > ", global_variables.udp_speed)
                 sock.sendto(b, (ip, port))
                 time_limit = time.time()
                 print("Отправил ", number, " пакет.")

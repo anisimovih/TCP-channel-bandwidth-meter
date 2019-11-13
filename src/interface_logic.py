@@ -135,7 +135,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
             self.stop()
 
     def stop_thread(self, additional_reason=None):
-        print("поток остановлен")
+        print("Задача выполнена, поток остановлен.")
         global_variables.thread_1_active = False
         self.thread = None
         '''self.thread_2.terminate()
@@ -149,6 +149,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
             global_variables.termination_reason = ''
 
     def stop(self):
+        print("Остановка пользователем.")
         global_variables.thread_1_active = False
         # Если это сервер, то делаем пустой коннект, чтобы выйти из ожидания.
         if global_variables.what_to_join == 'c' and Graph.normal_speeds_quantity == 0:
