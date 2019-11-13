@@ -95,7 +95,7 @@ def udp_reception(port, size, writer):
     last_number = 0
 
     """ожидание подключения"""
-    with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as sock:
+    with socket.socket(type=socket.SOCK_DGRAM) as sock:
         sock.bind(("", port))
         while global_variables.thread_1_active:
 
@@ -116,7 +116,7 @@ def udp_reception(port, size, writer):
             number = message[0] + message[1] * 255 + message[2] * 65025 - 1  # Номер из пакета.
             real_number += 1  # Реальное числополученных пакетов
 
-            if global_variables.very_first_time is not None:
+            if global_variables.very_first_time is not None and global_variables.thread_1_active:
                 if number > last_number:  # Если пакет застрял, то мы его не отображаем (график только возрастает по x).
                     delta = format(end_time - start_time, '8f')
                     speed = smoothing_graph('udp', start_time, end_time, size, number, real_number)

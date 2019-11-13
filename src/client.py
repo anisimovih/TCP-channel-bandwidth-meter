@@ -40,7 +40,7 @@ def tcp_connection(ip, port, size, b):
 def udp_connection(ip, port, size, b):
     time_limit = time.time()
     try:
-        with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as sock:
+        with socket.socket(type=socket.SOCK_DGRAM) as sock:
             while global_variables.thread_1_active:
                 for i in range(3, size):
                     b[i] = random.randint(0, 255)

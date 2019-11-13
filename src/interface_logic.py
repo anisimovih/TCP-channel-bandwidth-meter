@@ -1,6 +1,7 @@
 # TODO: перенести взаимодействие с графиком в его класс
 # 10.0.74.152
 import sys  # sys нужен для передачи argv в QApplication
+import socket
 
 from PyQt5 import QtCore, QtWidgets
 # from PyQt5.Qt import (QMessageBox)
@@ -135,7 +136,7 @@ class WorkingWindow(QtWidgets.QMainWindow):
             self.stop()
 
     def stop_thread(self, additional_reason=None):
-        print("Задача выполнена, поток остановлен.")
+        print("Поток передачи остановлен.")
         global_variables.thread_1_active = False
         self.thread = None
         '''self.thread_2.terminate()
@@ -158,6 +159,9 @@ class WorkingWindow(QtWidgets.QMainWindow):
                 client.connect_to_server("127.0.0.1", int(text[1]), int(text[2]), text[3])
         elif global_variables.what_to_join == 's':
             self.stop_thread("Фаервол не дает подключиться")
+        elif global_variables.what_to_join == 'c' and global_variables.connection_type == 'UDP':
+            with socket.socket(type=socket.SOCK_DGRAM) as sock:
+                sock.sendto(b'end', ("127.0.0.1", int(global_variables.port)))
 
     # </editor-fold>
 
